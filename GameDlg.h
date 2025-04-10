@@ -54,6 +54,7 @@ public:
 	void DelCardDraw(int x, int y, CDC* pDC);
 	void DelCard(int x, int y, CDC* pDC);
 	bool CheckChance(double p);
+	Card& posCard(int x, int y) { return cards[card_table[x][y]]; }
 	vector<CPoint> GetCards(int x, int y, char opt);
 	vector<CPoint> GetTypeCards(int x, int y, int type);
 	vector<CPoint> GetTypeCards(int x, int y, vector<int> type);

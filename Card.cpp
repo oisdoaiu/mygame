@@ -42,6 +42,8 @@ void Card::Draw(CDC* pDC)
 	const int dy2 = 40;
 	const int dx3 = 20;
 	const int dy3 = 40;
+	const int dx4 = 13;
+	const int dy4 = 40;
 
 	if (mul > 1) {
 		tmp.Format(TEXT("X %d"), mul);
@@ -100,6 +102,66 @@ void Card::Draw(CDC* pDC)
 	}
 	if (type == 13) {
 		tmp.Format(TEXT("首富"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 14) {
+		tmp.Format(TEXT("茶杯"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 15) {
+		tmp.Format(TEXT("茶"));
+		pDC->TextOutW(pos.x + dx1, pos.y + dy1, tmp);
+	}
+	if (type == 16) {
+		tmp.Format(TEXT("茶壶"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 17) {
+		tmp.Format(TEXT("奶牛"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 18) {
+		tmp.Format(TEXT("肥宅"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 19) {
+		tmp.Format(TEXT("草场"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 20) {
+		tmp.Format(TEXT("牛奶"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 21) {
+		tmp.Format(TEXT("小奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 22) {
+		tmp.Format(TEXT("中奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 23) {
+		tmp.Format(TEXT("大奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 24) {
+		tmp.Format(TEXT("超大奶茶"));
+		pDC->TextOutW(pos.x + dx4, pos.y + dy4, tmp);
+	}
+	if (type == 25) {
+		tmp.Format(TEXT("吸管"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 26) {
+		tmp.Format(TEXT("大吸管"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 27) {
+		tmp.Format(TEXT("茶包"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 28) {
+		tmp.Format(TEXT("草料"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 	}
 }

@@ -86,7 +86,8 @@ END_MESSAGE_MAP()
 
 int POSX[5], POSY[5], Game_Round;
 const int SPACE_X = 200, SPACE_Y = 200;
-const int SCORE[14] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0 };
+const int CARD_NUM = 28;
+const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1 };
 
 BOOL CGameDlg::OnInitDialog()
 {
@@ -125,8 +126,7 @@ BOOL CGameDlg::OnInitDialog()
 	Card new_card;
 	new_card.Create(0);
 	cards.push_back(new_card);
-	new_card.Create(3);
-	cards.push_back(new_card);
+	for (int i = 14; i <= 28; i++) new_card.Create(i), cards.push_back(new_card);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -775,6 +775,16 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					cards[cur].cnt += dlt;
 					AddMul(i, j, dlt, 0, pDC);
 				}
+			}
+
+			//茶杯
+			if (cards[cur].type == 14) {
+				if (cards[cur].vis) continue;
+				cards[cur].vis = true;
+				vector<CPoint> tmp = GetTypeCards(-1, -1, 15);
+				if (tmp.empty()) continue;
+				Updated = true;
+				cards[cur].MarkYellow(pDC);
 			}
 		}
 		if (Updated) {
