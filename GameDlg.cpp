@@ -125,9 +125,7 @@ BOOL CGameDlg::OnInitDialog()
 	Card new_card;
 	new_card.Create(0);
 	cards.push_back(new_card);
-	new_card.Create(13);
-	cards.push_back(new_card);
-	new_card.Create(12);
+	new_card.Create(3);
 	cards.push_back(new_card);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

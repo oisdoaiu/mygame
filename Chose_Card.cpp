@@ -43,6 +43,9 @@ END_MESSAGE_MAP()
 
 const int CARD_NUM = 13;
 int Choice[3];
+const int RARITY[CARD_NUM + 1] = { 0,1,2,1,3,2,1,0,0,0,1,1,2,3 };
+const int RSCORE[4] = { 8,6,4,3 };
+int score[CARD_NUM+1];
 
 void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 {
@@ -312,6 +315,24 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 	// 12 + 14
 }
 
+int Chose_Card::SpawnCard()
+{
+	double sum = 0;
+	for (int i = 1; i <= CARD_NUM; i++) sum += score[i];
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<> dis(0.0, sum);
+	double randomValue = dis(gen);
+	double cursum = 0;
+	for (int i = 1; i <= CARD_NUM; i++) {
+		if (cursum <= randomValue && randomValue <= cursum + score[i]) {
+			return i;
+		}
+		cursum += score[i];
+	}
+	return 0;
+}
+
 void Chose_Card::OnPaint()
 {
 	CPaintDC dc(this);
@@ -338,14 +359,20 @@ void Chose_Card::OnPaint()
 	DrawCard(&dc, Choice[2], sx, sy, 3);
 }
 
-
 BOOL Chose_Card::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	random_device rd;
-	mt19937 gen(rd());
-	for (int i = 0; i < 3; i++) Choice[i] = gen()%CARD_NUM+1;
-	Choice[0] = 13;
+	
+	//获取权重
+	srand((unsigned)time(NULL));
+	
+	for (int i = 1; i <= CARD_NUM; i++) {
+		score[i] = RSCORE[RARITY[i]];
+	}
+
+	//生成卡牌
+	for (int i = 0; i < 3; i++) Choice[i] = SpawnCard();
+	
 	return TRUE; // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }

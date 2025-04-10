@@ -22,6 +22,7 @@ public:
 		this->vis = other.vis;
 		this->mul = other.mul;
 		this->initscore = other.initscore;
+		this->weight = other.weight;
 	}
 
 	// 拷贝赋值运算符
@@ -35,6 +36,7 @@ public:
 			this->vis = other.vis;
 			this->mul = other.mul;
 			this->initscore = other.initscore;
+			this->weight = other.weight;
 		}
 		return *this;
 	}
@@ -50,6 +52,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	int type, cnt, score, mul;
+	double weight;
 	bool dead, vis, initscore;
 	CPoint pos;
 	void Draw(CDC* pDC);
@@ -77,6 +80,20 @@ public:
 	11：经理
 	12：老板
 	13：首富
+
+	14：茶杯
+	15：茶
+	16：茶壶
+	17：奶牛
+	18：肥宅
+	19：草场
+	20：牛奶
+	21：小奶茶
+	22：中奶茶
+	23：大奶茶
+	24：超大奶茶
+	25：吸管
+	26：大吸管
 */
 
 /*

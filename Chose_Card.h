@@ -26,6 +26,7 @@ public:
 	afx_msg void OnPaint();
 	virtual BOOL OnInitDialog();
 	void DrawCard(CDC* pDC, int type, int sx, int sy, int pos);
+	int SpawnCard();
 	afx_msg void OnBnClickedButton1();
 	CGameDlg* prt;
 	afx_msg void OnBnClickedButton2();
