@@ -398,7 +398,7 @@ void CInfo::OnPaint()
 		size = dc.GetTextExtent(_T("效果"));
 		nextX = tx + size.cx;
 		dc.SetTextColor(RGB(0, 0, 0));
-		dc.TextOut(nextX, ty, _T("：每有一杯茶金币+1"));
+		dc.TextOut(nextX, ty, _T("：每有一杯茶金币+3"));
 	}
 
 	if (cur.type == 15) {
@@ -457,18 +457,6 @@ void CInfo::OnPaint()
 		nextX = tx + size.cx;
 		dc.SetTextColor(RGB(0, 0, 0));
 		dc.TextOut(nextX, ty, _T("：2"));
-
-		tx = sx + 20, ty = sy + 200;
-		dc.SetTextColor(RGB(255, 185, 15));
-		dc.TextOut(tx, ty, _T("效果"));
-		size = dc.GetTextExtent(_T("效果"));
-		nextX = tx + size.cx;
-		dc.SetTextColor(RGB(0, 0, 0));
-		dc.TextOut(nextX, ty, _T("：消耗相邻的草产生牛奶，每有一个相邻草场再产生一瓶"));
-		ty += 20;
-		size = dc.GetTextExtent(_T("效果："));
-		nextX = tx + size.cx;
-		dc.TextOut(nextX, ty, _T("牛奶"));
 	}
 
 	if (cur.type == 18) {
@@ -512,7 +500,7 @@ void CInfo::OnPaint()
 		size = dc.GetTextExtent(_T("效果"));
 		nextX = tx + size.cx;
 		dc.SetTextColor(RGB(0, 0, 0));
-		dc.TextOut(nextX, ty, _T("：为相邻的奶牛提供草料"));
+		dc.TextOut(nextX, ty, _T("：让相邻的奶牛产生牛奶，并让其增加5金币"));
 	}
 
 	if (cur.type == 20) {
@@ -622,7 +610,7 @@ void CInfo::OnPaint()
 		size = dc.GetTextExtent(_T("效果"));
 		nextX = tx + size.cx;
 		dc.SetTextColor(RGB(0, 0, 0));
-		dc.TextOut(nextX, ty, _T("：被消除后获得150金币，有5%概率留下一个小奶茶"));
+		dc.TextOut(nextX, ty, _T("：被消除后获得150金币，有40%概率留下一个小奶茶"));
 	}
 
 	if (cur.type == 25) {
@@ -670,7 +658,7 @@ void CInfo::OnPaint()
 		ty += 20;
 		size = dc.GetTextExtent(_T("效果："));
 		nextX = tx + size.cx;
-		dc.TextOut(nextX, ty, _T("有70%概率消失"));
+		dc.TextOut(nextX, ty, _T("有60%概率消失"));
 	}
 
 	if (cur.type == 27) {

@@ -327,7 +327,7 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		pDC->TextOut(nextX, ty, _T("：1"));
 
 		ty = sy + 200;
-		pDC->TextOut(tx, ty, _T("每有一杯茶金币+1"));
+		pDC->TextOut(tx, ty, _T("每有一杯茶金币+3"));
 
 	}
 
@@ -381,11 +381,6 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		nextX = tx + size.cx;
 		pDC->SetTextColor(RGB(0, 0, 0));
 		pDC->TextOut(nextX, ty, _T("：2"));
-
-		ty = sy + 200;
-		pDC->TextOut(tx, ty, _T("消耗相邻的草产生牛奶，每有"));
-		ty += 20;
-		pDC->TextOut(tx, ty, _T("一个相邻草场再产生一瓶牛奶"));
 	}
 
 	if (type == 18) {
@@ -421,7 +416,9 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		pDC->TextOut(nextX, ty, _T("：3"));
 
 		ty = sy + 200;
-		pDC->TextOut(tx, ty, _T("为相邻的奶牛提供草料"));
+		pDC->TextOut(tx, ty, _T("让相邻的奶牛产生牛奶，并让"));
+		ty += 20;
+		pDC->TextOut(tx, ty, _T("其增加5金币"));
 	}
 
 	if (type == 20) {
@@ -512,7 +509,7 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		pDC->TextOut(nextX, ty, _T("：5"));
 
 		ty = sy + 200;
-		pDC->TextOut(tx, ty, _T("被消除后获得150金币，有5%"));
+		pDC->TextOut(tx, ty, _T("被消除后获得150金币，有40%"));
 		ty += 20;
 		pDC->TextOut(tx, ty, _T("概率留下一个小奶茶"));
 	}
@@ -655,6 +652,7 @@ BOOL Chose_Card::OnInitDialog()
 
 	//生成卡牌
 	for (int i = 0; i < 3; i++) Choice[i] = SpawnCard();
+	Choice[0] = 19;
 	
 	return TRUE; // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE

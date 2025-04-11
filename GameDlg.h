@@ -47,14 +47,15 @@ public:
 	void Eat(int sx, int sy, int tx, int ty, CDC* pDC);
 	int GetType(int x, int y);
 	void UpdateCard();
-	bool AddCard(int x, int y, int type, int opt, CDC* pDC);
-	void AddCard(int x, int y, int type, CDC* pDC);
-	bool AddCardDraw(int x, int y, int type, int opt, CDC* pDC);
+	bool AddCard(int x, int y, int type, int opt, bool copy, CDC* pDC);
+	void AddCard(int x, int y, int type, bool copy, CDC* pDC);
+	bool AddCardDraw(int x, int y, int type, int opt, bool copy, CDC* pDC);
 	bool IsType(int x, int y, vector<int>type);
 	void DelCardDraw(int x, int y, CDC* pDC);
 	void DelCard(int x, int y, CDC* pDC);
 	bool CheckChance(double p);
 	Card& posCard(int x, int y) { return cards[card_table[x][y]]; }
+	Card& posCard(CPoint pos) { return cards[card_table[pos.x][pos.y]]; }
 	vector<CPoint> GetCards(int x, int y, char opt);
 	vector<CPoint> GetTypeCards(int x, int y, int type);
 	vector<CPoint> GetTypeCards(int x, int y, vector<int> type);

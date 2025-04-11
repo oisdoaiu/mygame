@@ -196,6 +196,16 @@ void Card::MarkBlue(CDC* pDC)
 	Mark(pDC, 123, 104, 238);
 }
 
+void Card::MarkDarkgreen(CDC* pDC)
+{
+	Mark(pDC, 46, 139, 87);
+}
+
+void Card::MarkPink(CDC* pDC)
+{
+	Mark(pDC, 255, 105, 180);
+}
+
 void Card::DisMark(CDC* pDC)
 {
 	CRect tmp_rect(pos.x - DIS, pos.y - DIS, pos.x + CARDLENGTH + DIS, pos.y + CARDWIDTH + DIS);

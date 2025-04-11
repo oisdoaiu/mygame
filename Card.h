@@ -61,6 +61,8 @@ public:
 	void MarkGreen(CDC* pDC);
 	void MarkRed(CDC* pDC);
 	void MarkBlue(CDC* pDC);
+	void MarkDarkgreen(CDC* pDC);
+	void MarkPink(CDC* pDC);
 	void DisMark(CDC* pDC);
 	void Create(int Type);
 	CButton Check_Lib;
@@ -80,7 +82,6 @@ public:
 	11：经理
 	12：老板
 	13：首富
-
 	14：茶杯
 	15：茶
 	16：茶壶
