@@ -183,6 +183,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Abi.h" />
+    <ClInclude Include="CAbility.h" />
     <ClInclude Include="Card.h" />
     <ClInclude Include="CGame_Over.h" />
     <ClInclude Include="Chose_Card.h" />
@@ -197,6 +199,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Abi.cpp" />
+    <ClCompile Include="CAbility.cpp" />
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="CGame_Over.cpp" />
     <ClCompile Include="Chose_Card.cpp" />

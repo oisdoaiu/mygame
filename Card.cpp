@@ -111,10 +111,14 @@ void Card::Draw(CDC* pDC)
 	if (type == 15) {
 		tmp.Format(TEXT("茶"));
 		pDC->TextOutW(pos.x + dx1, pos.y + dy1, tmp);
+		tmp.Format(TEXT("%d"), 1 - cnt);
+		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
 	}
 	if (type == 16) {
 		tmp.Format(TEXT("茶壶"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+		tmp.Format(TEXT("%d"), 1 - cnt);
+		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
 	}
 	if (type == 17) {
 		tmp.Format(TEXT("奶牛"));
@@ -224,7 +228,30 @@ void Card::Create(int Type)
 }
 
 BEGIN_MESSAGE_MAP(Card, CDialogEx)
+	ON_WM_NCLBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
 // Card 消息处理程序
+
+void Card::OnNcLButtonDown(UINT nHitTest, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	BOOL bDragFullWindow;
+	SystemParametersInfo(SPI_GETDRAGFULLWINDOWS, 0, &bDragFullWindow, 0);
+
+	// 禁用拖动时的全窗口刷新
+	if (bDragFullWindow)
+	{
+		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, FALSE, NULL, 0);
+	}
+
+	CDialog::OnNcLButtonDown(nHitTest, point);
+
+	// 恢复系统设置
+	if (bDragFullWindow)
+	{
+		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, TRUE, NULL, 0);
+	}
+	CDialogEx::OnNcLButtonDown(nHitTest, point);
+}

@@ -66,6 +66,7 @@ public:
 	void DisMark(CDC* pDC);
 	void Create(int Type);
 	CButton Check_Lib;
+	afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
 };
 
 /*

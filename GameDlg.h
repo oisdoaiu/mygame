@@ -1,6 +1,7 @@
 ﻿
 // GameDlg.h: 头文件
 #include"Card.h"
+#include"Abi.h"
 //
 
 #pragma once
@@ -33,9 +34,10 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	int Money, Cost;
+	int Money, Cost, reroll_num, delete_num;
 	int card_table[5][5];
 	vector<Card> cards;
+	vector<Abi> abilities;
 	void DrawBlocks(CDC* pDC);
 	void SpawnTable();
 	void AddScore(int x, int y, int add, CDC* pDC);
@@ -64,8 +66,10 @@ public:
 	afx_msg void OnBnClickedButton1();
 	CButton CCALC;
 	CButton CCheck;
+	CButton CCheckA;
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void Restart();
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnBnClickedButton3();
 };

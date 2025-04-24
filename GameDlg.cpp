@@ -6,6 +6,7 @@
 #include "framework.h"
 #include "Game.h"
 #include "GameDlg.h"
+#include "CAbility.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -65,6 +66,7 @@ void CGameDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON1, CCALC);
 	DDX_Control(pDX, IDC_BUTTON2, CCheck);
+	DDX_Control(pDX, IDC_BUTTON3, CCheckA);
 }
 
 BEGIN_MESSAGE_MAP(CGameDlg, CDialogEx)
@@ -79,6 +81,7 @@ BEGIN_MESSAGE_MAP(CGameDlg, CDialogEx)
 	ON_WM_MOUSELEAVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
+	ON_BN_CLICKED(IDC_BUTTON3, &CGameDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -92,7 +95,7 @@ const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,
 BOOL CGameDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
+	MoveWindow(100, 100, 1500, 1200);
 	// 将“关于...”菜单项添加到系统菜单中。
 
 	// IDM_ABOUTBOX 必须在系统命令范围内。
@@ -119,19 +122,27 @@ BOOL CGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+
 	int START_X = 500, START_Y = 100;
-	Cost = 20; Game_Round = 0; Money = 0; cards.clear();
+	Cost = 20; 
+	Game_Round = 0; 
+	Money = 0; 
+	cards.clear(); 
+	reroll_num = 3;
+	delete_num = 3;
 	POSX[0] = START_X; for (int i = 1; i < 5; i++) POSX[i] = POSX[i - 1] + SPACE_X;
 	POSY[0] = START_Y; for (int i = 1; i < 5; i++) POSY[i] = POSY[i - 1] + SPACE_Y;
 	Card new_card;
 	new_card.Create(0);
 	cards.push_back(new_card);
-	for(int i=1; i<=5; i++)
-		new_card.Create(17),
-		cards.push_back(new_card);
-	for (int i = 1; i <= 5; i++)
-		new_card.Create(28),
-		cards.push_back(new_card);
+	new_card.Create(9);
+	cards.push_back(new_card);
+	new_card.Create(6);
+	cards.push_back(new_card);
+	new_card.Create(14);
+	cards.push_back(new_card);
+	new_card.Create(21);
+	cards.push_back(new_card);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -222,7 +233,8 @@ void CGameDlg::OnPaint()
 
 	//启动一轮计算
 	CCALC.EnableWindow(FALSE);
-	CCheck.EnableWindow(FALSE);
+	//CCheck.EnableWindow(FALSE);
+	CCheckA.EnableWindow(FALSE);
 	SetTimer(3, 100, NULL);
 		
 	// 将内存DC的内容复制到屏幕
@@ -448,7 +460,6 @@ void CGameDlg::AddCard(int x, int y, int type, bool copy, CDC* pDC)
 
 	cards.push_back(ncard);
 	card_table[x][y] = cards.size() - 1;
-	assert(GetType(x, y) == type);
 
 	ncard.MarkGreen(pDC);
 	Wait(TIMEG);
@@ -1280,6 +1291,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 		//后Update，防止统计出错
 		CCheck.EnableWindow(TRUE);
 		CCALC.EnableWindow(TRUE);
+		CCheckA.EnableWindow(TRUE);
 	}
 
 #undef In
@@ -1290,6 +1302,7 @@ void CGameDlg::OnBnClickedButton1()
 {
 	CCheck.EnableWindow(FALSE);
 	CCALC.EnableWindow(FALSE);
+	CCheckA.EnableWindow(FALSE);
 	if (Game_Round % 4 == 3) {
 		CString tmp;
 		CDC* pDC = GetDC();
@@ -1305,8 +1318,8 @@ void CGameDlg::OnBnClickedButton1()
 		pDC->SelectObject(pOldBrush);
 		whiteBrush.DeleteObject();
 		Money -= Cost;
-		if (Cost <= 200) Cost += 20;
-		else Cost *= 1.1;
+		if (Cost <= 100) Cost += 20;
+		else Cost *= 1.2;
 		tmp.Format(TEXT("金钱：%d"), Money);
 		pDC->TextOut(250, 300, tmp);
 
@@ -1317,6 +1330,8 @@ void CGameDlg::OnBnClickedButton1()
 			game_over.DoModal();
 			return;
 		}
+		delete_num += 2;
+		reroll_num += 2;
 	}
 	UpdateCard();
 	Game_Round++;
@@ -1347,7 +1362,9 @@ void CGameDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	//点击了一个框查看属性
 	if (px != -1 && card_table[px][py]!=0) {
 		CInfo info_dia;
-		assert(card_table[px][py] < cards.size());
+		info_dia.Del = false;
+		info_dia.prt = this;
+		info_dia.curid = card_table[px][py];
 		info_dia.cur = cards[card_table[px][py]];
 		info_dia.DoModal();
 	}
@@ -1368,4 +1385,14 @@ void CGameDlg::OnRButtonDown(UINT nFlags, CPoint point)
 	tmp.Format(TEXT("%d %d"), point.x, point.y);
 	MessageBox(tmp);
 	CDialogEx::OnRButtonDown(nFlags, point);
+}
+
+
+void CGameDlg::OnBnClickedButton3()
+{
+	CAbility ability;
+	ability.prt = this;
+	ability.page = 0;
+	ability.DoModal();
+	// TODO: 在此添加控件通知处理程序代码
 }

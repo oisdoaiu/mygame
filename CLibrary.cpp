@@ -73,8 +73,11 @@ void CLibrary::OnLButtonDown(UINT nFlags, CPoint point)
 			if (sx <= point.y && point.y <= sx + 100 && sy <= point.x && point.x <= sy + 100) {
 				CInfo new_info;
 				new_info.cur = Show[it];
+				new_info.Del = true;
+				new_info.prt = prt;
+				new_info.curid = it;
 				new_info.DoModal();
-				it = Show.size();
+				return;
 			}
 			sy += DISY;
 			it++;
@@ -82,4 +85,15 @@ void CLibrary::OnLButtonDown(UINT nFlags, CPoint point)
 		sx += DISX;
 	}
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+BOOL CLibrary::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	MoveWindow(150, 150, 1400, 900);
+	// TODO:  在此添加额外的初始化
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常: OCX 属性页应返回 FALSE
 }

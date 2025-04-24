@@ -25,9 +25,6 @@ Chose_Card::~Chose_Card()
 void Chose_Card::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BUTTON1, Show1);
-	DDX_Control(pDX, IDC_BUTTON2, Show2);
-	DDX_Control(pDX, IDC_BUTTON3, Show3);
 }
 
 
@@ -36,6 +33,8 @@ BEGIN_MESSAGE_MAP(Chose_Card, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &Chose_Card::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &Chose_Card::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &Chose_Card::OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_SKIP, &Chose_Card::OnBnClickedSkip)
+	ON_BN_CLICKED(IDC_REROLL, &Chose_Card::OnBnClickedReroll)
 END_MESSAGE_MAP()
 
 
@@ -53,6 +52,7 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 	int tx, ty;
 	CSize size;
 	int nextX;
+	pDC->SetBkColor(RGB(255, 255, 255));
 
 	if (type == 1) {
 		tx = sx + 50, ty = sy + 50;
@@ -595,6 +595,37 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 	// 12 + 14
 }
 
+void Chose_Card::Draw(CPaintDC* pDC)
+{
+	CString tmp;
+	tmp.Format(TEXT("金钱：%d"), prt->Money);
+	pDC->TextOutW(20, 20, tmp);
+
+	const int WIDTH = 300;
+	const int LENGTH = 600;
+	int sx = 100, sy = 50;
+	CRect rect(sx, sy, sx + WIDTH, sy + LENGTH);
+	pDC->Rectangle(rect);
+	DrawCard(pDC, Choice[0], sx, sy, 1);
+
+	sx = 500, sy = 50;
+	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
+	pDC->Rectangle(rect);
+	DrawCard(pDC, Choice[1], sx, sy, 2);
+
+	sx = 900, sy = 50;
+	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
+	pDC->Rectangle(rect);
+	DrawCard(pDC, Choice[2], sx, sy, 3);
+
+	//绘制刷新
+	CButton* pButton = (CButton*)GetDlgItem(IDC_REROLL);
+	tmp.Format(TEXT("刷新(还有%d次)"), prt->reroll_num);
+	pButton->SetWindowTextW(tmp);
+	if (prt->reroll_num == 0) pButton->EnableWindow(false);
+	else pButton->EnableWindow(true);
+}
+
 int Chose_Card::SpawnCard()
 {
 	double sum = 0;
@@ -616,33 +647,14 @@ int Chose_Card::SpawnCard()
 void Chose_Card::OnPaint()
 {
 	CPaintDC dc(this);
-
-	CString tmp;
-	tmp.Format(TEXT("金钱：%d"), prt->Money);
-	dc.TextOutW(20, 20, tmp);
-	
-	const int WIDTH = 300;
-	const int LENGTH = 600;
-	int sx = 100, sy = 50;
-	CRect rect(sx, sy, sx + WIDTH, sy + LENGTH);
-	dc.Rectangle(rect);
-	DrawCard(&dc, Choice[0], sx, sy, 1);
-
-	sx = 500, sy = 50;
-	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
-	dc.Rectangle(rect);
-	DrawCard(&dc, Choice[1], sx, sy, 2);
-
-	sx = 900, sy = 50;
-	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
-	dc.Rectangle(rect);
-	DrawCard(&dc, Choice[2], sx, sy, 3);
+	Draw(&dc);
 }
 
 BOOL Chose_Card::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	
+	MoveWindow(150, 150, 1400, 800);
+
 	//获取权重
 	srand((unsigned)time(NULL));
 	
@@ -652,8 +664,7 @@ BOOL Chose_Card::OnInitDialog()
 
 	//生成卡牌
 	for (int i = 0; i < 3; i++) Choice[i] = SpawnCard();
-	Choice[0] = 19;
-	
+	Invalidate();
 	return TRUE; // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -683,8 +694,16 @@ void Chose_Card::OnBnClickedButton3()
 }
 
 
-void Chose_Card::OnBnClickedButton4()
+void Chose_Card::OnBnClickedSkip()
 {
 	EndDialog(IDOK);
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void Chose_Card::OnBnClickedReroll()
+{
+	prt->reroll_num--;
+	OnInitDialog();
 	// TODO: 在此添加控件通知处理程序代码
 }

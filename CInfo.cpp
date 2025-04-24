@@ -30,6 +30,7 @@ void CInfo::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CInfo, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
+	ON_BN_CLICKED(IDC_DELETE, &CInfo::OnBnClickedDelete)
 END_MESSAGE_MAP()
 
 
@@ -38,6 +39,26 @@ END_MESSAGE_MAP()
 
 void CInfo::OnPaint()
 {
+	CString tmp;
+	CButton* pButton = (CButton*)GetDlgItem(IDC_DELETE);
+	if (cur.dead) {
+		tmp.Format(TEXT("已删除"));
+		pButton->SetWindowTextW(tmp);
+		pButton->ShowWindow(SW_SHOW);
+		pButton->EnableWindow(false);
+	}
+	else {
+		if (Del) {
+			tmp.Format(TEXT("删除(剩余%d次)"), prt->delete_num);
+			pButton->SetWindowTextW(tmp);
+			pButton->ShowWindow(SW_SHOW);
+			if (prt->delete_num == 0) pButton->EnableWindow(false);
+			else pButton->EnableWindow(true);
+		}
+		else {
+			pButton->ShowWindow(SW_HIDE);
+		}
+	}
 	CPaintDC dc(this);
 	CRect rect;
 	GetClientRect(rect);
@@ -46,7 +67,6 @@ void CInfo::OnPaint()
 	cur.pos = CPoint(240, 90);
 	cur.Draw(&dc);
 	int tx, ty, sx = 20, sy = 50;
-	CString tmp;
 	CSize size;
 	int nextX;
 
@@ -711,4 +731,25 @@ BOOL CInfo::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+
+void CInfo::OnBnClickedDelete()
+{
+	prt->cards[curid].dead = true;
+	prt->delete_num--;
+	EndDialog(IDOK);
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+BOOL CInfo::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	MoveWindow(200, 200, 600, 900);
+	// TODO:  在此添加额外的初始化
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常: OCX 属性页应返回 FALSE
 }

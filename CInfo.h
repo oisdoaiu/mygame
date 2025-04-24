@@ -23,7 +23,12 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	CGameDlg* prt;
 	Card cur;
+	bool Del;
+	int curid;
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnBnClickedDelete();
+	virtual BOOL OnInitDialog();
 };
