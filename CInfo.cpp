@@ -30,6 +30,7 @@ void CInfo::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CInfo, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
+	ON_BN_CLICKED(IDC_DELETE, &CInfo::OnBnClickedDelete)
 END_MESSAGE_MAP()
 
 
@@ -38,6 +39,26 @@ END_MESSAGE_MAP()
 
 void CInfo::OnPaint()
 {
+	CString tmp;
+	CButton* pButton = (CButton*)GetDlgItem(IDC_DELETE);
+	if (cur.dead) {
+		tmp.Format(TEXT("已删除"));
+		pButton->SetWindowTextW(tmp);
+		pButton->ShowWindow(SW_SHOW);
+		pButton->EnableWindow(false);
+	}
+	else {
+		if (Del) {
+			tmp.Format(TEXT("删除(剩余%d次)"), prt->delete_num);
+			pButton->SetWindowTextW(tmp);
+			pButton->ShowWindow(SW_SHOW);
+			if (prt->delete_num == 0) pButton->EnableWindow(false);
+			else pButton->EnableWindow(true);
+		}
+		else {
+			pButton->ShowWindow(SW_HIDE);
+		}
+	}
 	CPaintDC dc(this);
 	CRect rect;
 	GetClientRect(rect);
@@ -46,7 +67,6 @@ void CInfo::OnPaint()
 	cur.pos = CPoint(240, 90);
 	cur.Draw(&dc);
 	int tx, ty, sx = 20, sy = 50;
-	CString tmp;
 	CSize size;
 	int nextX;
 
@@ -378,6 +398,332 @@ void CInfo::OnPaint()
 		ty += 30;
 		dc.TextOut(nextX, ty, _T("吸收其他的首富，永久获得其倍率"));
 	}
+
+	if (cur.type == 14) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("茶杯"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：每有一杯茶金币+3"));
+	}
+
+	if (cur.type == 15) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("茶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：和相邻的牛奶合成小奶茶，留下茶杯"));
+	}
+
+	if (cur.type == 16) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("茶壶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：3"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：将相邻的茶杯变为茶,每个杯子每回合仅限一次"));
+	}
+
+	if (cur.type == 17) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("奶牛"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：2"));
+	}
+
+	if (cur.type == 18) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("肥宅"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：3"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消耗相邻的奶茶，每消耗一杯奶茶有1%的概率死亡"));
+	}
+
+	if (cur.type == 19) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("草场"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：3"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：让相邻的奶牛产生牛奶，并让其增加5金币"));
+	}
+
+	if (cur.type == 20) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("牛奶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：和相邻的茶合成小奶茶"));
+	}
+
+	if (cur.type == 21) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("小奶茶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：和相邻的小奶茶合成中奶茶，被消除后获得10金币"));
+	}
+
+	if (cur.type == 22) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("中奶茶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：和相邻的中奶茶合成大奶茶，被消除后获得25金币"));
+	}
+
+	if (cur.type == 23) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("大奶茶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：2"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：和相邻的大奶茶合成超大奶茶，被消除后获得60金币"));
+	}
+
+	if (cur.type == 24) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("超大奶茶"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：5"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：被消除后获得150金币，有40%概率留下一个小奶茶"));
+	}
+
+	if (cur.type == 25) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("吸管"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消除相邻的奶茶，成功消除并结算后消失"));
+	}
+
+	if (cur.type == 26) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("大吸管"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：3"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消除相邻的奶茶并将其金币翻倍，成功消除并结算后"));
+		ty += 20;
+		size = dc.GetTextExtent(_T("效果："));
+		nextX = tx + size.cx;
+		dc.TextOut(nextX, ty, _T("有60%概率消失"));
+	}
+
+	if (cur.type == 27) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("茶包"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消除自身将相邻的茶杯变为茶，并让其增加5金币"));
+	}
+
+	if (cur.type == 28) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("草料"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：1"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消除自身让相邻的奶牛产生牛奶，并让其增加5金币"));
+	}
 }
 
 
@@ -385,4 +731,25 @@ BOOL CInfo::OnEraseBkgnd(CDC* pDC)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+
+void CInfo::OnBnClickedDelete()
+{
+	prt->cards[curid].dead = true;
+	prt->delete_num--;
+	EndDialog(IDOK);
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+BOOL CInfo::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	MoveWindow(200, 200, 600, 900);
+	// TODO:  在此添加额外的初始化
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常: OCX 属性页应返回 FALSE
 }

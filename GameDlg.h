@@ -1,6 +1,7 @@
 ﻿
 // GameDlg.h: 头文件
 #include"Card.h"
+#include"Abi.h"
 //
 
 #pragma once
@@ -33,9 +34,10 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	int Money, Cost;
+	int Money, Cost, reroll_num, delete_num;
 	int card_table[5][5];
 	vector<Card> cards;
+	vector<Abi> abilities;
 	void DrawBlocks(CDC* pDC);
 	void SpawnTable();
 	void AddScore(int x, int y, int add, CDC* pDC);
@@ -47,13 +49,15 @@ public:
 	void Eat(int sx, int sy, int tx, int ty, CDC* pDC);
 	int GetType(int x, int y);
 	void UpdateCard();
-	bool AddCard(int x, int y, int type, int opt, CDC* pDC);
-	void AddCard(int x, int y, int type, CDC* pDC);
-	bool AddCardDraw(int x, int y, int type, int opt, CDC* pDC);
+	bool AddCard(int x, int y, int type, int opt, bool copy, CDC* pDC);
+	void AddCard(int x, int y, int type, bool copy, CDC* pDC);
+	bool AddCardDraw(int x, int y, int type, int opt, bool copy, CDC* pDC);
 	bool IsType(int x, int y, vector<int>type);
 	void DelCardDraw(int x, int y, CDC* pDC);
 	void DelCard(int x, int y, CDC* pDC);
 	bool CheckChance(double p);
+	Card& posCard(int x, int y) { return cards[card_table[x][y]]; }
+	Card& posCard(CPoint pos) { return cards[card_table[pos.x][pos.y]]; }
 	vector<CPoint> GetCards(int x, int y, char opt);
 	vector<CPoint> GetTypeCards(int x, int y, int type);
 	vector<CPoint> GetTypeCards(int x, int y, vector<int> type);
@@ -62,8 +66,10 @@ public:
 	afx_msg void OnBnClickedButton1();
 	CButton CCALC;
 	CButton CCheck;
+	CButton CCheckA;
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void Restart();
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnBnClickedButton3();
 };

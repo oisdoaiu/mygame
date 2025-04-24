@@ -42,6 +42,8 @@ void Card::Draw(CDC* pDC)
 	const int dy2 = 40;
 	const int dx3 = 20;
 	const int dy3 = 40;
+	const int dx4 = 13;
+	const int dy4 = 40;
 
 	if (mul > 1) {
 		tmp.Format(TEXT("X %d"), mul);
@@ -102,6 +104,70 @@ void Card::Draw(CDC* pDC)
 		tmp.Format(TEXT("首富"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 	}
+	if (type == 14) {
+		tmp.Format(TEXT("茶杯"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 15) {
+		tmp.Format(TEXT("茶"));
+		pDC->TextOutW(pos.x + dx1, pos.y + dy1, tmp);
+		tmp.Format(TEXT("%d"), 1 - cnt);
+		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+	}
+	if (type == 16) {
+		tmp.Format(TEXT("茶壶"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+		tmp.Format(TEXT("%d"), 1 - cnt);
+		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+	}
+	if (type == 17) {
+		tmp.Format(TEXT("奶牛"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 18) {
+		tmp.Format(TEXT("肥宅"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 19) {
+		tmp.Format(TEXT("草场"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 20) {
+		tmp.Format(TEXT("牛奶"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 21) {
+		tmp.Format(TEXT("小奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 22) {
+		tmp.Format(TEXT("中奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 23) {
+		tmp.Format(TEXT("大奶茶"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 24) {
+		tmp.Format(TEXT("超大奶茶"));
+		pDC->TextOutW(pos.x + dx4, pos.y + dy4, tmp);
+	}
+	if (type == 25) {
+		tmp.Format(TEXT("吸管"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 26) {
+		tmp.Format(TEXT("大吸管"));
+		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 27) {
+		tmp.Format(TEXT("茶包"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 28) {
+		tmp.Format(TEXT("草料"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
 }
 
 void Card::Mark(CDC* pDC, int R, int G, int B)
@@ -134,6 +200,16 @@ void Card::MarkBlue(CDC* pDC)
 	Mark(pDC, 123, 104, 238);
 }
 
+void Card::MarkDarkgreen(CDC* pDC)
+{
+	Mark(pDC, 46, 139, 87);
+}
+
+void Card::MarkPink(CDC* pDC)
+{
+	Mark(pDC, 255, 105, 180);
+}
+
 void Card::DisMark(CDC* pDC)
 {
 	CRect tmp_rect(pos.x - DIS, pos.y - DIS, pos.x + CARDLENGTH + DIS, pos.y + CARDWIDTH + DIS);
@@ -152,7 +228,30 @@ void Card::Create(int Type)
 }
 
 BEGIN_MESSAGE_MAP(Card, CDialogEx)
+	ON_WM_NCLBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
 // Card 消息处理程序
+
+void Card::OnNcLButtonDown(UINT nHitTest, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	BOOL bDragFullWindow;
+	SystemParametersInfo(SPI_GETDRAGFULLWINDOWS, 0, &bDragFullWindow, 0);
+
+	// 禁用拖动时的全窗口刷新
+	if (bDragFullWindow)
+	{
+		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, FALSE, NULL, 0);
+	}
+
+	CDialog::OnNcLButtonDown(nHitTest, point);
+
+	// 恢复系统设置
+	if (bDragFullWindow)
+	{
+		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, TRUE, NULL, 0);
+	}
+	CDialogEx::OnNcLButtonDown(nHitTest, point);
+}

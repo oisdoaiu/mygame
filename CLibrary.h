@@ -26,4 +26,5 @@ public:
 	CGameDlg* prt;
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	virtual BOOL OnInitDialog();
 };

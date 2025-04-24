@@ -26,12 +26,12 @@ public:
 	afx_msg void OnPaint();
 	virtual BOOL OnInitDialog();
 	void DrawCard(CDC* pDC, int type, int sx, int sy, int pos);
+	void Draw(CPaintDC* pDC);
+	int SpawnCard();
 	afx_msg void OnBnClickedButton1();
 	CGameDlg* prt;
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
-	afx_msg void OnBnClickedButton4();
-	CButton Show1;
-	CButton Show2;
-	CButton Show3;
+	afx_msg void OnBnClickedSkip();
+	afx_msg void OnBnClickedReroll();
 };
