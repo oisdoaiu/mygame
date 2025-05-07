@@ -27,12 +27,14 @@ CLibrary::~CLibrary()
 void CLibrary::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDOK, CConfirm);
 }
 
 
 BEGIN_MESSAGE_MAP(CLibrary, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -91,9 +93,21 @@ BOOL CLibrary::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	CConfirm.MoveWindow(630, 750, 140, 40);
 	MoveWindow(150, 150, 1400, 900);
+
 	// TODO:  在此添加额外的初始化
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
+}
+
+
+void CLibrary::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CString tmp;
+	tmp.Format(TEXT("%d %d"), point.x, point.y);
+	MessageBox(tmp);
+	CDialogEx::OnRButtonDown(nFlags, point);
 }

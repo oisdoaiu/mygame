@@ -55,6 +55,7 @@ public:
 	bool IsType(int x, int y, vector<int>type);
 	void DelCardDraw(int x, int y, CDC* pDC);
 	void DelCard(int x, int y, CDC* pDC);
+	CPoint DrawRandom(vector<CPoint>x, CDC* pDC);
 	bool CheckChance(double p);
 	Card& posCard(int x, int y) { return cards[card_table[x][y]]; }
 	Card& posCard(CPoint pos) { return cards[card_table[pos.x][pos.y]]; }

@@ -27,4 +27,6 @@ public:
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnInitDialog();
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	CButton CConfirm;
 };

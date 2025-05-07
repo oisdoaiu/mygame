@@ -25,6 +25,11 @@ Chose_Card::~Chose_Card()
 void Chose_Card::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON1, CChoice1);
+	DDX_Control(pDX, IDC_BUTTON2, CChoice2);
+	DDX_Control(pDX, IDC_BUTTON3, CChoice3);
+	DDX_Control(pDX, IDC_SKIP, CSkip);
+	DDX_Control(pDX, IDC_REROLL, CReroll);
 }
 
 
@@ -35,14 +40,15 @@ BEGIN_MESSAGE_MAP(Chose_Card, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON3, &Chose_Card::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_SKIP, &Chose_Card::OnBnClickedSkip)
 	ON_BN_CLICKED(IDC_REROLL, &Chose_Card::OnBnClickedReroll)
+	ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
 // Chose_Card 消息处理程序
 
-const int CARD_NUM = 28;
+const int CARD_NUM = 31;
 int Choice[3];
-const int RARITY[CARD_NUM + 1] = { 0,1,2,1,3,2,1,0,0,0,1,1,2,3,0,0,2,1,3,2,0,0,0,2,3,1,2,0,0 };
+const int RARITY[CARD_NUM + 1] = { 0,1,2,1,3,2,1,0,0,0,1,1,2,3,0,0,2,1,3,2,0,0,0,2,3,1,2,0,0,1,2,3 };
 const int RSCORE[4] = { 8,6,4,3 };
 int score[CARD_NUM+1];
 
@@ -592,28 +598,88 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		pDC->TextOut(tx, ty, _T("奶，并让其增加5金币"));
 	}
 
+	if (type == 29) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("铜指针"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：1"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("让周围随机一个格子倍率+3"));
+	}
+
+	if (type == 30) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("银指针"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：2"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("让周围随机一个格子倍率+6"));
+	}
+
+	if (type == 31) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("银指针"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：3"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("让周围随机一个格子倍率+10"));
+		ty += 20;
+		pDC->TextOut(tx, ty, _T("或翻倍(取最高)"));
+	}
+
 	// 12 + 14
 }
 
 void Chose_Card::Draw(CPaintDC* pDC)
 {
 	CString tmp;
+	pDC->SetBkMode(TRANSPARENT);
 	tmp.Format(TEXT("金钱：%d"), prt->Money);
 	pDC->TextOutW(20, 20, tmp);
+	pDC->SetBkMode(OPAQUE);
 
 	const int WIDTH = 300;
 	const int LENGTH = 600;
 	int sx = 100, sy = 50;
-	CRect rect(sx, sy, sx + WIDTH, sy + LENGTH);
+	CRect rect;
+	
+	DrawRarity(pDC, Choice[0], sx, sy);
+	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
 	pDC->Rectangle(rect);
 	DrawCard(pDC, Choice[0], sx, sy, 1);
 
 	sx = 500, sy = 50;
+	DrawRarity(pDC, Choice[1], sx, sy);
 	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
 	pDC->Rectangle(rect);
 	DrawCard(pDC, Choice[1], sx, sy, 2);
 
 	sx = 900, sy = 50;
+	DrawRarity(pDC, Choice[2], sx, sy);
 	rect = CRect(sx, sy, sx + WIDTH, sy + LENGTH);
 	pDC->Rectangle(rect);
 	DrawCard(pDC, Choice[2], sx, sy, 3);
@@ -624,6 +690,34 @@ void Chose_Card::Draw(CPaintDC* pDC)
 	pButton->SetWindowTextW(tmp);
 	if (prt->reroll_num == 0) pButton->EnableWindow(false);
 	else pButton->EnableWindow(true);
+}
+
+void Chose_Card::DrawRarity(CDC* pDC, int type, int sx, int sy)
+{
+	CRect rect;
+	const int WIDTH = 300;
+	const int LENGTH = 600;
+	if (RARITY[type] == 0) {
+		CBrush greenBrush(RGB(0, 255, 0));
+		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		pDC->FillRect(&rect, &greenBrush);
+	}
+	if (RARITY[type] == 1) {
+		CBrush yellowBrush(RGB(255, 204, 51));
+		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		pDC->FillRect(&rect, &yellowBrush);
+	}
+	if (RARITY[type] == 2) {
+		CBrush purpleBrush(RGB(204, 51, 255));
+		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		pDC->FillRect(&rect, &purpleBrush);
+	}
+	if (RARITY[type] == 3) {
+		CBrush redBrush(RGB(255, 51, 102));
+		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		pDC->FillRect(&rect, &redBrush);
+	}
+	
 }
 
 int Chose_Card::SpawnCard()
@@ -654,6 +748,11 @@ BOOL Chose_Card::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	MoveWindow(150, 150, 1400, 800);
+	CChoice1.MoveWindow(180, 670, 140, 40);
+	CChoice2.MoveWindow(580, 670, 140, 40);
+	CChoice3.MoveWindow(980, 670, 140, 40);
+	CSkip.MoveWindow(500, 715, 140, 30);
+	CReroll.MoveWindow(650, 715, 140, 30);
 
 	//获取权重
 	srand((unsigned)time(NULL));
@@ -664,6 +763,9 @@ BOOL Chose_Card::OnInitDialog()
 
 	//生成卡牌
 	for (int i = 0; i < 3; i++) Choice[i] = SpawnCard();
+	Choice[0] = 29;
+	Choice[1] = 30;
+	Choice[2] = 31;
 	Invalidate();
 	return TRUE; // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
@@ -706,4 +808,14 @@ void Chose_Card::OnBnClickedReroll()
 	prt->reroll_num--;
 	OnInitDialog();
 	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void Chose_Card::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CString tmp;
+	tmp.Format(TEXT("%d %d"), point.x, point.y);
+	MessageBox(tmp);
+	CDialogEx::OnRButtonDown(nFlags, point);
 }
