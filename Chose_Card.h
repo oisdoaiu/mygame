@@ -27,6 +27,7 @@ public:
 	virtual BOOL OnInitDialog();
 	void DrawCard(CDC* pDC, int type, int sx, int sy, int pos);
 	void Draw(CPaintDC* pDC);
+	void DrawRarity(CDC* pdc, int type, int sx, int sy);
 	int SpawnCard();
 	afx_msg void OnBnClickedButton1();
 	CGameDlg* prt;
@@ -34,4 +35,10 @@ public:
 	afx_msg void OnBnClickedButton3();
 	afx_msg void OnBnClickedSkip();
 	afx_msg void OnBnClickedReroll();
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	CButton CChoice1;
+	CButton CChoice2;
+	CButton CChoice3;
+	CButton CSkip;
+	CButton CReroll;
 };

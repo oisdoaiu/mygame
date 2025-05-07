@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include <atlimage.h>
+
 
 
 // Card 对话框
@@ -98,6 +100,9 @@ public:
 	26：大吸管
 	27：茶包
 	28：草料
+	29：铜指针
+	30：银指针
+	31：金指针
 */
 
 /*

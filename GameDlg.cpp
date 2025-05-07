@@ -89,8 +89,8 @@ END_MESSAGE_MAP()
 
 int POSX[5], POSY[5], Game_Round;
 const int SPACE_X = 200, SPACE_Y = 200;
-const int CARD_NUM = 28;
-const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1 };
+const int CARD_NUM = 31;
+const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1,1,2,3 };
 
 BOOL CGameDlg::OnInitDialog()
 {
@@ -115,14 +115,15 @@ BOOL CGameDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
 	}
-
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	CCheck.MoveWindow(250, 500, 140, 40);
+	CCheckA.MoveWindow(250, 550, 140, 40);
+	CCALC.MoveWindow(880, 1050, 140, 40);
 	int START_X = 500, START_Y = 100;
 	Cost = 20; 
 	Game_Round = 0; 
@@ -134,14 +135,6 @@ BOOL CGameDlg::OnInitDialog()
 	POSY[0] = START_Y; for (int i = 1; i < 5; i++) POSY[i] = POSY[i - 1] + SPACE_Y;
 	Card new_card;
 	new_card.Create(0);
-	cards.push_back(new_card);
-	new_card.Create(9);
-	cards.push_back(new_card);
-	new_card.Create(6);
-	cards.push_back(new_card);
-	new_card.Create(14);
-	cards.push_back(new_card);
-	new_card.Create(21);
 	cards.push_back(new_card);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -526,6 +519,26 @@ void CGameDlg::DelCard(int x, int y, CDC* pDC) {
 	card_table[x][y] = 0;
 }
 
+CPoint CGameDlg::DrawRandom(vector<CPoint> x, CDC* pDC)
+{
+	random_device rd;
+	mt19937 mt(rd());
+	uniform_int_distribution<int> rnum(30,35);
+	int num = rnum(mt);
+	uniform_int_distribution<int> rs(0, x.size()-1);
+	int s = rs(mt);
+	Card dtmp;
+	while(num --> 0) {
+		s++;
+		if (s == x.size()) s = 0;
+		dtmp.pos = CPoint(POSX[x[s].x], POSY[x[s].y]);
+		dtmp.MarkGreen(pDC);
+		Wait(500 / (num + 1));
+		if (num) dtmp.DisMark(pDC);
+	}
+	return x[s];
+}
+
 bool CGameDlg::CheckChance(double p)
 {
 	srand((unsigned)time(NULL));
@@ -640,6 +653,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 1) { //寻找并处理
 		KillTimer(1);
 		bool Updated = false;
+		vector<CPoint>kkk;
+		for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
+			kkk.push_back(CPoint(i, j));
+		}
+		DrawRandom(kkk, pDC);
+
 
 		for (int i = 0; i < 5 && !Updated; i++) for (int j = 0; j < 5 && !Updated; j++){
 			//判定动画
@@ -1318,8 +1337,8 @@ void CGameDlg::OnBnClickedButton1()
 		pDC->SelectObject(pOldBrush);
 		whiteBrush.DeleteObject();
 		Money -= Cost;
-		if (Cost <= 100) Cost += 20;
-		else Cost *= 1.2;
+		if (Cost <= 100) Cost += 40;
+		else Cost *= 1.5;
 		tmp.Format(TEXT("金钱：%d"), Money);
 		pDC->TextOut(250, 300, tmp);
 

@@ -2,7 +2,6 @@
 // Microsoft Visual C++ 生成的包含文件。
 // 供 Game.rc 使用
 //
-#define IDOK2                           2
 #define ID_Page                         2
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
