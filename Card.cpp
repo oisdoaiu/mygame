@@ -51,23 +51,6 @@ void Card::Draw(CDC* pDC)
 	}
 
 	if (type == 1) {
-
-		//// 载入JPG图片
-		//CImage image;
-		//HRESULT hResult = image.Load(_T("your_image.jpg")); // 替换为你的图片路径
-		//if (FAILED(hResult))
-		//{
-		//	// 图片加载失败，处理错误
-		//	return;
-		//}
-
-		//// 指定绘制位置
-		//int x = pos.x; // 横坐标
-		//int y = pos.y; // 纵坐标
-
-		//// 绘制图片
-		//image.Draw(pDC->m_hDC, x, y, image.GetWidth(), image.GetHeight());
-
 		tmp.Format(TEXT("兔子"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 		tmp.Format(TEXT("%d"), 1-cnt);
@@ -196,6 +179,20 @@ void Card::Draw(CDC* pDC)
 	if (type == 31) {
 		tmp.Format(TEXT("金指针"));
 		pDC->TextOutW(pos.x + dx3, pos.y + dy3, tmp);
+	}
+	if (type == 32) {
+		tmp.Format(TEXT("咖啡"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+		tmp.Format(TEXT("%d"), cnt);
+		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+	}
+	if (type == 33) {
+		tmp.Format(TEXT("小偷"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
+	}
+	if (type == 34) {
+		tmp.Format(TEXT("警察"));
+		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 	}
 }
 

@@ -790,6 +790,72 @@ void CInfo::OnPaint()
 		dc.SetTextColor(RGB(0, 0, 0));
 		dc.TextOut(nextX, ty, _T("：让周围随机一个格子倍率+10或翻倍(取最高)"));
 	}
+
+	if (cur.type == 32) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("咖啡"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：0"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：让周围角色倍率翻倍，生效3次以后移除自身"));
+	}
+
+	if (cur.type == 33) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("小偷"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：0"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：偷走相邻格子一半基础金币"));
+	}
+
+	if (cur.type == 34) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("警察"));
+		dc.TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		dc.SetTextColor(RGB(255, 0, 0));
+		dc.TextOut(tx, ty, _T("基础"));
+		size = dc.GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：2"));
+
+		tx = sx + 20, ty = sy + 200;
+		dc.SetTextColor(RGB(255, 185, 15));
+		dc.TextOut(tx, ty, _T("效果"));
+		size = dc.GetTextExtent(_T("效果"));
+		nextX = tx + size.cx;
+		dc.SetTextColor(RGB(0, 0, 0));
+		dc.TextOut(nextX, ty, _T("：消除相邻小偷获得其3倍基础金币"));
+	}
 }
 
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "afxdialogex.h"
 #include <atlimage.h>
+typedef long long ll;
 
 
 
@@ -53,7 +54,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	int type, cnt, score, mul;
+	int type, cnt;
+	ll score, mul;
 	double weight;
 	bool dead, vis, initscore;
 	CPoint pos;
@@ -103,11 +105,15 @@ public:
 	29：铜指针
 	30：银指针
 	31：金指针
+	32：咖啡
+	33：小偷
+	34：警察
 */
 
 /*
 	1.Card中绘制信息
-	2.Chose_Card中card_num，绘制卡面信息
+	2.Chose_Card中card_num，绘制卡面信息，稀有度
 	3.CInfo中卡面信息
 	4.GameDlg中SCORE信息和处理信息，NUM数组大小
+	5.GameDlg.h中num
 */

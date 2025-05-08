@@ -26,6 +26,7 @@ CGame_Over::~CGame_Over()
 void CGame_Over::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDOK, CConfirm);
 }
 
 
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CGame_Over, CDialogEx)
 	ON_WM_PAINT()
 	ON_BN_CLICKED(IDOK, &CGame_Over::OnBnClickedOk)
 	ON_WM_CLOSE()
+	ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -42,6 +44,16 @@ END_MESSAGE_MAP()
 void CGame_Over::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
+	MoveWindow(100, 100, 1500, 1200);
+	CConfirm.MoveWindow(700, 1100, 140, 40);
+	CRect rect;
+	GetClientRect(rect);
+	dc.FillSolidRect(rect, RGB(255, 255, 255));
+	CString tmp;
+	tmp.Format(TEXT("总计获得经费：%lld"), prt->Total_Money);
+	dc.TextOutW(630, 70, tmp);
+	tmp.Format(TEXT("单回合最大收益：%lld"), prt->Max_Money);
+	dc.TextOutW(630, 100, tmp);
 
 	CFont newFont;
 	LOGFONT lf;
@@ -53,11 +65,22 @@ void CGame_Over::OnPaint()
 	newFont.CreateFontIndirect(&lf);
 	// 保存原来的字体
 	CFont* pOldFont = dc.SelectObject(&newFont);
-	CRect rect;
-	GetClientRect(rect);
-	dc.FillSolidRect(rect, RGB(255, 255, 255));
-	dc.TextOutW(230, 100, TEXT("游戏结束！"));
+	dc.TextOutW(640, 10, TEXT("游戏结束！"));
 	dc.SelectObject(pOldFont);
+
+	Card tc;
+	int px=30, py=150;
+	CDC* pDC = GetDC();
+	for (int i = 1; i <= 34; i++) {
+		tc.Create(i);
+		tc.pos = CPoint(px, py);
+		tc.Draw(pDC);
+		tmp.Format(TEXT("%lld"), prt->Sum[i]);
+		dc.TextOutW(px+120, py+40, tmp);
+		py += 130;
+		if (i % 7 == 0) px += 280, py = 150;
+
+	}	
 	// TODO: 在此处添加消息处理程序代码
 	// 不为绘图消息调用 CDialogEx::OnPaint()
 }
@@ -92,4 +115,15 @@ void CGame_Over::OnClose()
 		return;
 	}
 	CDialogEx::OnClose();
+}
+
+
+void CGame_Over::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CString tmp;
+	tmp.Format(TEXT("%d %d"), point.x, point.y);
+	MessageBox(tmp);
+	CDialogEx::OnRButtonDown(nFlags, point);
 }

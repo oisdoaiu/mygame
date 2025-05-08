@@ -2,9 +2,11 @@
 // GameDlg.h: 头文件
 #include"Card.h"
 #include"Abi.h"
+typedef long long ll;
 //
 
 #pragma once
+const int CARD_NUM = 34;
 
 
 // CGameDlg 对话框
@@ -34,18 +36,20 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	int Money, Cost, reroll_num, delete_num;
+	ll Money, Cost, Total_Money, Max_Money;
+	ll Sum[CARD_NUM+1];
+	int reroll_num, delete_num;
 	int card_table[5][5];
 	vector<Card> cards;
 	vector<Abi> abilities;
 	void DrawBlocks(CDC* pDC);
 	void SpawnTable();
-	void AddScore(int x, int y, int add, CDC* pDC);
-	void MulScore(int x, int y, int add, CDC* pDC);
-	void InitScore(int x, int y, int score, CDC* pDC);
+	void AddScore(int x, int y, ll add, CDC* pDC);
+	void MulScore(int x, int y, ll add, CDC* pDC);
+	void InitScore(int x, int y, ll score, CDC* pDC);
 	void ClearScore(int x, int y, CDC* pDC);
-	int GetScore(int x, int y, CDC* pDC);
-	void AddMul(int x, int y, int mul, char opt, CDC* pDC);
+	ll GetScore(int x, int y, CDC* pDC);
+	void AddMul(int x, int y, ll mul, char opt, CDC* pDC);
 	void Eat(int sx, int sy, int tx, int ty, CDC* pDC);
 	int GetType(int x, int y);
 	void UpdateCard();
@@ -73,4 +77,6 @@ public:
 	void Restart();
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedButton3();
+	afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
+	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 };

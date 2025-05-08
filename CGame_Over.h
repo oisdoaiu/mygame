@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "afxdialogex.h"
+#include "GameDlg.h"
 
 
 // CGame_Over 对话框
@@ -25,4 +26,7 @@ public:
 	afx_msg void OnPaint();
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnClose();
+	CButton CConfirm;
+	CGameDlg* prt;
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 };

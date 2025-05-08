@@ -46,9 +46,8 @@ END_MESSAGE_MAP()
 
 // Chose_Card 消息处理程序
 
-const int CARD_NUM = 31;
 int Choice[3];
-const int RARITY[CARD_NUM + 1] = { 0,1,2,1,3,2,1,0,0,0,1,1,2,3,0,0,2,1,3,2,0,0,0,2,3,1,2,0,0,1,2,3 };
+const int RARITY[CARD_NUM + 1] = { 0,1,2,1,3,2,1,0,0,0,1,1,2,3,0,0,2,1,3,2,0,0,0,2,3,1,2,0,0,1,2,3,1,1,2 };
 const int RSCORE[4] = { 8,6,4,3 };
 int score[CARD_NUM+1];
 
@@ -634,7 +633,7 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 
 	if (type == 31) {
 		tx = sx + 50, ty = sy + 50;
-		tmp.Format(TEXT("银指针"));
+		tmp.Format(TEXT("金指针"));
 		pDC->TextOutW(tx, ty, tmp);
 
 		tx = sx + 20, ty = sy + 150;
@@ -651,6 +650,80 @@ void Chose_Card::DrawCard(CDC* pDC, int type, int sx, int sy, int pos)
 		pDC->TextOut(tx, ty, _T("或翻倍(取最高)"));
 	}
 
+	if (type == 32) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("咖啡"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：3"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("让周围角色倍率翻倍，生效"));
+		ty += 20;
+		pDC->TextOut(tx, ty, _T("3次以后移除自身"));
+	}
+
+	if (type == 32) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("咖啡"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：3"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("让周围角色倍率翻倍，生效"));
+		ty += 20;
+		pDC->TextOut(tx, ty, _T("3次以后移除自身"));
+	}
+
+	if (type == 33) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("小偷"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：0"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("偷走相邻格子一半基础金币"));
+	}
+
+	if (type == 34) {
+		tx = sx + 50, ty = sy + 50;
+		tmp.Format(TEXT("警察"));
+		pDC->TextOutW(tx, ty, tmp);
+
+		tx = sx + 20, ty = sy + 150;
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->TextOut(tx, ty, _T("基础"));
+		size = pDC->GetTextExtent(_T("基础"));
+		nextX = tx + size.cx;
+		pDC->SetTextColor(RGB(0, 0, 0));
+		pDC->TextOut(nextX, ty, _T("：2"));
+
+		ty = sy + 200;
+		pDC->TextOut(tx, ty, _T("消除相邻小偷获得其3倍基础"));
+		ty += 20;
+		pDC->TextOut(tx, ty, _T("金币"));
+	}
+
 	// 12 + 14
 }
 
@@ -658,7 +731,7 @@ void Chose_Card::Draw(CPaintDC* pDC)
 {
 	CString tmp;
 	pDC->SetBkMode(TRANSPARENT);
-	tmp.Format(TEXT("金钱：%d"), prt->Money);
+	tmp.Format(TEXT("金钱：%lld"), prt->Money);
 	pDC->TextOutW(20, 20, tmp);
 	pDC->SetBkMode(OPAQUE);
 
@@ -699,22 +772,22 @@ void Chose_Card::DrawRarity(CDC* pDC, int type, int sx, int sy)
 	const int LENGTH = 600;
 	if (RARITY[type] == 0) {
 		CBrush greenBrush(RGB(0, 255, 0));
-		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		rect = CRect(sx - 5, sy - 5, sx + WIDTH + 5, sy + LENGTH + 5);
 		pDC->FillRect(&rect, &greenBrush);
 	}
 	if (RARITY[type] == 1) {
 		CBrush yellowBrush(RGB(255, 204, 51));
-		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		rect = CRect(sx - 5, sy - 5, sx + WIDTH + 5, sy + LENGTH + 5);
 		pDC->FillRect(&rect, &yellowBrush);
 	}
 	if (RARITY[type] == 2) {
 		CBrush purpleBrush(RGB(204, 51, 255));
-		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		rect = CRect(sx - 5, sy - 5, sx + WIDTH + 5, sy + LENGTH + 5);
 		pDC->FillRect(&rect, &purpleBrush);
 	}
 	if (RARITY[type] == 3) {
 		CBrush redBrush(RGB(255, 51, 102));
-		rect = CRect(sx - 10, sy - 10, sx + WIDTH + 10, sy + LENGTH + 10);
+		rect = CRect(sx - 5, sy - 5, sx + WIDTH + 5, sy + LENGTH + 5);
 		pDC->FillRect(&rect, &redBrush);
 	}
 	
@@ -763,9 +836,6 @@ BOOL Chose_Card::OnInitDialog()
 
 	//生成卡牌
 	for (int i = 0; i < 3; i++) Choice[i] = SpawnCard();
-	Choice[0] = 29;
-	Choice[1] = 30;
-	Choice[2] = 31;
 	Invalidate();
 	return TRUE; // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE

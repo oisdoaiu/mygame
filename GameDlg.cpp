@@ -82,6 +82,8 @@ BEGIN_MESSAGE_MAP(CGameDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON3, &CGameDlg::OnBnClickedButton3)
+	ON_WM_NCLBUTTONDOWN()
+	ON_WM_NCMOUSEMOVE()
 END_MESSAGE_MAP()
 
 
@@ -89,8 +91,7 @@ END_MESSAGE_MAP()
 
 int POSX[5], POSY[5], Game_Round;
 const int SPACE_X = 200, SPACE_Y = 200;
-const int CARD_NUM = 31;
-const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1,1,2,3 };
+const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1,1,2,3,0,0,2 };
 
 BOOL CGameDlg::OnInitDialog()
 {
@@ -126,7 +127,11 @@ BOOL CGameDlg::OnInitDialog()
 	CCALC.MoveWindow(880, 1050, 140, 40);
 	int START_X = 500, START_Y = 100;
 	Cost = 20; 
-	Game_Round = 0; 
+	Cost = 2000000;
+	Game_Round = 3; 
+	memset(Sum, 0, sizeof Sum);
+	Total_Money = 0;
+	Max_Money = 0;
 	Money = 0; 
 	cards.clear(); 
 	reroll_num = 3;
@@ -136,7 +141,11 @@ BOOL CGameDlg::OnInitDialog()
 	Card new_card;
 	new_card.Create(0);
 	cards.push_back(new_card);
-
+	new_card.Create(4);
+	for (int i = 1; i <= 3; i++) cards.push_back(new_card);
+	new_card.Create(3);
+	for (int i = 1; i <= 3; i++) cards.push_back(new_card);
+	//cards.push_back(new_card);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -181,10 +190,10 @@ void CGameDlg::OnPaint()
 	
 	CString tmp;
 	//显示钱数
-	tmp.Format(TEXT("金钱：%d"), Money);
+	tmp.Format(TEXT("金钱：%lld"), Money);
 	memDC.TextOut(250, 300, tmp);
 	memDC.SetTextColor(RGB(255, 0, 0));
-	tmp.Format(TEXT("需求：%d"), Cost);
+	tmp.Format(TEXT("需求：%lld"), Cost);
 	memDC.TextOut(250, 320, tmp);
 	memDC.SetTextColor(RGB(0, 0, 0));
 
@@ -292,7 +301,7 @@ void CGameDlg::SpawnTable()
 	}
 }
 
-void CGameDlg::AddScore(int x, int y, int add, CDC* pDC)
+void CGameDlg::AddScore(int x, int y, ll add, CDC* pDC)
 {
 	//擦除之前的
 	int sx = POSX[x], sy = POSY[y];
@@ -310,11 +319,17 @@ void CGameDlg::AddScore(int x, int y, int add, CDC* pDC)
 
 	//绘制加数
 	CString tmp;
-	tmp.Format(TEXT("+ %d"), add);
-	pDC->TextOutW(sx + 5, sy - 60, tmp);
+	if (add > 0) {
+		tmp.Format(TEXT("+ %lld"), add);
+		pDC->TextOutW(sx + 5, sy - 60, tmp);
+	}
+	else if (add < 0) {
+		tmp.Format(TEXT("- %lld"), -add);
+		pDC->TextOutW(sx + 5, sy - 60, tmp);
+	}
 }
 
-void CGameDlg::MulScore(int x, int y, int mul, CDC* pDC)
+void CGameDlg::MulScore(int x, int y, ll mul, CDC* pDC)
 {
 	//擦除之前的
 	int sx = POSX[x], sy = POSY[y];
@@ -332,14 +347,14 @@ void CGameDlg::MulScore(int x, int y, int mul, CDC* pDC)
 
 	//绘制加数
 	CString tmp;
-	tmp.Format(TEXT("X %d"), mul);
+	tmp.Format(TEXT("X %lld"), mul);
 	pDC->TextOutW(sx + 5, sy - 60, tmp);
 }
 
-void CGameDlg::InitScore(int x, int y, int score, CDC* pDC)
+void CGameDlg::InitScore(int x, int y, ll score, CDC* pDC)
 {
 	CString tmp;
-	tmp.Format(TEXT("%d"), score);
+	tmp.Format(TEXT("%lld"), score);
 	pDC->TextOutW(POSX[x] + 5, POSY[y] - 40, tmp);
 	cards[card_table[x][y]].initscore = false;
 	cards[card_table[x][y]].score = score;
@@ -356,7 +371,7 @@ void CGameDlg::ClearScore(int x, int y, CDC* pDC)
 	whiteBrush.DeleteObject();
 }
 
-int CGameDlg::GetScore(int x, int y, CDC* pDC)
+ll CGameDlg::GetScore(int x, int y, CDC* pDC)
 {
 	Card& cur = cards[card_table[x][y]];
 	if (cur.initscore) {
@@ -366,7 +381,8 @@ int CGameDlg::GetScore(int x, int y, CDC* pDC)
 	return cur.score;
 }
 
-void CGameDlg::AddMul(int x, int y, int mul, char opt, CDC* pDC)
+//0加1乘
+void CGameDlg::AddMul(int x, int y, ll mul, char opt, CDC* pDC)
 {
 	int sx = POSX[x], sy = POSY[y];
 	CRect rect(sx + 5, sy + 65, sx + 90, sy + 90);
@@ -380,7 +396,7 @@ void CGameDlg::AddMul(int x, int y, int mul, char opt, CDC* pDC)
 		cards[card_table[x][y]].mul *= mul;
 	if (opt == 0)
 		cards[card_table[x][y]].mul += mul;
-	CString tmp; tmp.Format(TEXT("X %d"), cards[card_table[x][y]].mul);
+	CString tmp; tmp.Format(TEXT("X %lld"), cards[card_table[x][y]].mul);
 	pDC->TextOutW(sx + 10, sy + 70, tmp);
 }
 
@@ -523,7 +539,7 @@ CPoint CGameDlg::DrawRandom(vector<CPoint> x, CDC* pDC)
 {
 	random_device rd;
 	mt19937 mt(rd());
-	uniform_int_distribution<int> rnum(30,35);
+	uniform_int_distribution<int> rnum(10,15);
 	int num = rnum(mt);
 	uniform_int_distribution<int> rs(0, x.size()-1);
 	int s = rs(mt);
@@ -531,10 +547,9 @@ CPoint CGameDlg::DrawRandom(vector<CPoint> x, CDC* pDC)
 	while(num --> 0) {
 		s++;
 		if (s == x.size()) s = 0;
-		dtmp.pos = CPoint(POSX[x[s].x], POSY[x[s].y]);
-		dtmp.MarkGreen(pDC);
-		Wait(500 / (num + 1));
-		if (num) dtmp.DisMark(pDC);
+		posCard(x[s]).MarkGreen(pDC);
+		Wait(400 / (num*2 + 1));
+		if (num) posCard(x[s]).DisMark(pDC);
 	}
 	return x[s];
 }
@@ -546,6 +561,7 @@ bool CGameDlg::CheckChance(double p)
 	return randomValue < p;
 }
 
+//以(x,y)为中心，是否相邻
 vector<CPoint> CGameDlg::GetCards(int x, int y, char opt)
 {
 	const int dx[8] = { -1,-1,-1,0,0,1,1,1 };
@@ -562,6 +578,7 @@ vector<CPoint> CGameDlg::GetCards(int x, int y, char opt)
 	return res;
 }
 
+//(x,y)周围type卡，x=-1时取全局
 vector<CPoint> CGameDlg::GetTypeCards(int x, int y, int type)
 {
 	const int dx[8] = { -1,-1,-1,0,0,1,1,1 };
@@ -584,6 +601,7 @@ vector<CPoint> CGameDlg::GetTypeCards(int x, int y, int type)
 	return res;
 }
 
+//(x,y)周围type卡，x=-1时取全局
 vector<CPoint> CGameDlg::GetTypeCards(int x, int y, vector<int> type)
 {
 	const int dx[8] = { -1,-1,-1,0,0,1,1,1 };
@@ -607,6 +625,7 @@ vector<CPoint> CGameDlg::GetTypeCards(int x, int y, vector<int> type)
 	return vector<CPoint>();
 }
 
+//(x,y)周围随机一个卡，x=-1取全局
 CPoint CGameDlg::GetRandomBlock(int x, int y)
 {
 	CPoint q[25]; int num=0;
@@ -653,11 +672,6 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 1) { //寻找并处理
 		KillTimer(1);
 		bool Updated = false;
-		vector<CPoint>kkk;
-		for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
-			kkk.push_back(CPoint(i, j));
-		}
-		DrawRandom(kkk, pDC);
 
 
 		for (int i = 0; i < 5 && !Updated; i++) for (int j = 0; j < 5 && !Updated; j++){
@@ -786,15 +800,17 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 							cards[card_table[v.x][v.y]].DisMark(pDC);
 						}
 					}
+					bool added = false;
 					cards[cur].DisMark(pDC);
 					if (cards[cur].vis == false) {
 						cards[cur].vis = true;
 						if (CheckChance(0.05)) {
 							AddCardDraw(i, j, 9, 0, 1, pDC);
+							added = true;
 							Updated = true;
 						}
 					}
-
+					if (added) break;
 				}
 
 				//老板
@@ -812,15 +828,17 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 							cards[card_table[v.x][v.y]].DisMark(pDC);
 						}
 					}
+					bool added = false;
 					cards[cur].DisMark(pDC);
 					if (cards[cur].vis == false) {
 						cards[cur].vis = true;
 						if (CheckChance(0.1)) {
 							AddCardDraw(i, j, 9, 0, 1, pDC);
+							added = true;
 							Updated = true;
 						}
 					}
-
+					if (added) break;
 				}
 
 				//首富
@@ -858,6 +876,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					for (CPoint v : tmp)
 						posCard(v).DisMark(pDC);
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//茶
@@ -873,6 +892,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					cards[cur].MarkYellow(pDC);
 					AddCard(-1, -1, 21, 0, false, pDC);
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//茶壶
@@ -893,6 +913,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						cur.DisMark(pDC);
 					}
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//肥宅
@@ -936,6 +957,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					}
 					if (!dead)
 						cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//草场
@@ -953,6 +975,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						AddCardDraw(v.x, v.y, 20, 0, true, pDC);
 					}
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//牛奶
@@ -968,6 +991,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					cards[cur].MarkYellow(pDC);
 					AddCard(-1, -1, 21, 0, false, pDC);
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//小奶茶
@@ -981,6 +1005,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					DelCard(tmp[0].x, tmp[0].y, pDC);
 					DelCard(i, j, pDC);
 					AddCard(-1, -1, 22, 0, false, pDC);
+					break;
 				}
 
 				//中奶茶
@@ -994,6 +1019,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					DelCard(tmp[0].x, tmp[0].y, pDC);
 					DelCard(i, j, pDC);
 					AddCard(-1, -1, 23, 0, false, pDC);
+					break;
 				}
 
 				//大奶茶
@@ -1007,6 +1033,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					DelCard(tmp[0].x, tmp[0].y, pDC);
 					DelCard(i, j, pDC);
 					AddCard(-1, -1, 24, 0, false, pDC);
+					break;
 				}
 
 				//吸管
@@ -1044,6 +1071,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						}
 					}
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//大吸管
@@ -1081,6 +1109,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						}
 					}
 					cards[cur].DisMark(pDC);
+					break;
 				}
 
 				//茶包
@@ -1097,6 +1126,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						Wait(200);
 						cur.DisMark(pDC);
 					}
+					break;
 				}
 
 				//草料
@@ -1110,6 +1140,98 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						AddScore(v.x, v.y, 5, pDC);
 						AddCardDraw(v.x, v.y, 20, 0, true, pDC);
 					}
+					break;
+				}
+
+				//铜指针
+				if (cards[cur].type == 29) {
+					if (cards[cur].vis) continue;
+					vector<CPoint> tmp = GetCards(i, j, 1);
+					if (tmp.empty()) continue;
+					cards[cur].vis = true;
+					Updated = true;
+					cards[cur].MarkYellow(pDC);
+					CPoint upd = DrawRandom(tmp, pDC);
+					AddMul(upd.x, upd.y, 3, 0, pDC);
+					posCard(upd).DisMark(pDC);
+					cards[cur].DisMark(pDC);
+				}
+
+				//银指针
+				if (cards[cur].type == 30) {
+					if (cards[cur].vis) continue;
+					vector<CPoint> tmp = GetCards(i, j, 1);
+					if (tmp.empty()) continue;
+					cards[cur].vis = true;
+					Updated = true;
+					cards[cur].MarkYellow(pDC);
+					CPoint upd = DrawRandom(tmp, pDC);
+					AddMul(upd.x, upd.y, 6, 0, pDC);
+					posCard(upd).DisMark(pDC);
+					cards[cur].DisMark(pDC);
+				}
+
+				//金指针
+				if (cards[cur].type == 31) {
+					if (cards[cur].vis) continue;
+					vector<CPoint> tmp = GetCards(i, j, 1);
+					if (tmp.empty()) continue;
+					cards[cur].vis = true;
+					Updated = true;
+					cards[cur].MarkYellow(pDC);
+					CPoint upd = DrawRandom(tmp, pDC);
+					if(posCard(upd).mul<=10)
+						AddMul(upd.x, upd.y, 10, 0, pDC);
+					else
+						AddMul(upd.x, upd.y, 2, 1, pDC);
+					posCard(upd).DisMark(pDC);
+					cards[cur].DisMark(pDC);
+				}
+
+				//咖啡
+				if (cards[cur].type == 32) {
+					if (cards[cur].vis) continue;
+					if (cards[cur].cnt == 3) continue;
+					vector<CPoint> tmp = GetTypeCards(i, j, { 9,10,11,12,13 });
+					if (tmp.empty()) continue;
+					Updated = true;
+					cards[cur].vis = true;
+					cards[cur].cnt++;
+					cards[cur].MarkYellow(pDC);
+					Wait(200);
+					for (CPoint v : tmp) {
+						AddMul(v.x, v.y, 2, 1, pDC);
+						posCard(v).MarkGreen(pDC);
+					}
+					Wait(500);
+					cards[cur].DisMark(pDC);
+					for (CPoint v : tmp) {
+						posCard(v).DisMark(pDC);
+					}
+				}
+
+				//小偷
+				if (cards[cur].type == 33) {
+					if (cards[cur].vis) continue;
+					vector<CPoint> tmp = GetCards(i, j, 1);
+					if (tmp.empty()) continue;
+					cards[cur].vis = true;
+					Updated = true;
+					cards[cur].MarkYellow(pDC);
+					Wait(200);
+					ll sum = 0;
+					for (CPoint v : tmp) {
+						ll val = GetScore(v.x, v.y, pDC);
+						sum += val / 2;
+						AddScore(v.x, v.y, -val / 2, pDC);
+						posCard(v).MarkGreen(pDC);
+					}
+					AddScore(i, j, sum, pDC);
+					Wait(300);
+					for (CPoint v : tmp) {
+						posCard(v).DisMark(pDC);
+					}
+					cards[cur].DisMark(pDC);
 				}
 			}
 		}
@@ -1125,9 +1247,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 
 			vector<CPoint>tmp = GetTypeCards(-1, -1, 9);
 			//标出3个打工人
+			int base = 0, mul = 0;
 			for (int i = 0; i < 3; i++) {
 				int mx = tmp[i].x, my = tmp[i].y;
 				cards[card_table[mx][my]].MarkGreen(pDC);
+				base += GetScore(mx, my, pDC);
+				mul += posCard(mx, my).mul - 1;
 			}
 			Wait(TIMEG2);
 
@@ -1148,10 +1273,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 			ncard.pos = CPoint(POSX[npos.x], POSY[npos.y]);
 			cards.push_back(ncard);
 			card_table[npos.x][npos.y] = cards.size() - 1;
+			InitScore(npos.x, npos.y, base, pDC);
 			ncard.MarkYellow(pDC);
 			Wait(TIMEG);
 
 			ncard.DisMark(pDC);
+			AddMul(npos.x, npos.y, mul, 0, pDC);
 
 			SetTimer(1, 500, NULL);
 			return;
@@ -1162,9 +1289,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 
 			vector<CPoint>tmp = GetTypeCards(-1, -1, 10);
 			//标出3个主管
+			int base = 0, mul = 0;
 			for (int i = 0; i < 3; i++) {
 				int mx = tmp[i].x, my = tmp[i].y;
 				cards[card_table[mx][my]].MarkGreen(pDC);
+				base += GetScore(mx, my, pDC);
+				mul += posCard(mx, my).mul - 1;
 			}
 			Wait(TIMEG2);
 
@@ -1185,10 +1315,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 			ncard.pos = CPoint(POSX[npos.x], POSY[npos.y]);
 			cards.push_back(ncard);
 			card_table[npos.x][npos.y] = cards.size() - 1;
+			InitScore(npos.x, npos.y, base, pDC);
 			ncard.MarkYellow(pDC);
 			Wait(TIMEG);
 
 			ncard.DisMark(pDC);
+			AddMul(npos.x, npos.y, mul, 0, pDC);
 
 			SetTimer(1, 500, NULL);
 			return;
@@ -1199,9 +1331,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 
 			vector<CPoint>tmp = GetTypeCards(-1, -1, 11);
 			//标出3个经理
+			int base = 0, mul = 0;
 			for (int i = 0; i < 3; i++) {
 				int mx = tmp[i].x, my = tmp[i].y;
 				cards[card_table[mx][my]].MarkGreen(pDC);
+				base += GetScore(mx, my, pDC);
+				mul += posCard(mx, my).mul - 1;
 			}
 			Wait(TIMEG2);
 
@@ -1222,10 +1357,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 			ncard.pos = CPoint(POSX[npos.x], POSY[npos.y]);
 			cards.push_back(ncard);
 			card_table[npos.x][npos.y] = cards.size() - 1;
+			InitScore(npos.x, npos.y, base, pDC);
 			ncard.MarkYellow(pDC);
 			Wait(TIMEG);
 
 			ncard.DisMark(pDC);
+			AddMul(npos.x, npos.y, mul, 0, pDC);
 
 			SetTimer(1, 500, NULL);
 			return;
@@ -1274,13 +1411,17 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 			MulScore(i, j, cards[card_table[i][j]].mul, pDC);
 		}
 
-		int addscore = 0;
+		ll addscore = 0;
 		for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++)
-			if (card_table[i][j])
+			if (card_table[i][j]) {
 				addscore += cards[card_table[i][j]].score;
+				Sum[GetType(i, j)] += cards[card_table[i][j]].score;
+			}
+		Total_Money += addscore;
+		Max_Money = max(Max_Money, addscore);
 
 		CString tmp;
-		tmp.Format(TEXT("+%d"), addscore);
+		tmp.Format(TEXT("+%lld"), addscore);
 		pDC->SetTextColor(RGB(6, 197, 38));
 		pDC->TextOutW(297, 280, tmp);
 		pDC->SetTextColor(RGB(0, 0, 0));
@@ -1292,7 +1433,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 		pDC->SelectObject(pOldBrush);
 		whiteBrush.DeleteObject();
 		Money += addscore;
-		tmp.Format(TEXT("金钱：%d"), Money);
+		tmp.Format(TEXT("金钱：%lld"), Money);
 		pDC->TextOut(250, 300, tmp);
 
 		//处理结算后死亡
@@ -1325,7 +1466,7 @@ void CGameDlg::OnBnClickedButton1()
 	if (Game_Round % 4 == 3) {
 		CString tmp;
 		CDC* pDC = GetDC();
-		tmp.Format(TEXT("-%d"), Cost);
+		tmp.Format(TEXT("-%lld"), Cost);
 		pDC->SetTextColor(RGB(255,0,0));
 		pDC->TextOutW(301, 280, tmp);
 		pDC->SetTextColor(RGB(0, 0, 0));
@@ -1339,13 +1480,14 @@ void CGameDlg::OnBnClickedButton1()
 		Money -= Cost;
 		if (Cost <= 100) Cost += 40;
 		else Cost *= 1.5;
-		tmp.Format(TEXT("金钱：%d"), Money);
+		tmp.Format(TEXT("金钱：%lld"), Money);
 		pDC->TextOut(250, 300, tmp);
 
 		Wait(1000);
 		if (Money < 0) {
 			ShowWindow(SW_HIDE);
 			CGame_Over game_over;
+			game_over.prt = this;
 			game_over.DoModal();
 			return;
 		}
@@ -1414,4 +1556,26 @@ void CGameDlg::OnBnClickedButton3()
 	ability.page = 0;
 	ability.DoModal();
 	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CGameDlg::OnNcLButtonDown(UINT nHitTest, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (nHitTest == HTCAPTION)
+	{
+		return;
+	}
+	else
+	{
+		// 对于其他区域，执行默认处理
+		return CDialogEx::OnNcLButtonDown(nHitTest, point);
+	}
+}
+
+
+void CGameDlg::OnNcMouseMove(UINT nHitTest, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
 }
