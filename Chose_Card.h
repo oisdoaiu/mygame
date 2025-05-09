@@ -25,9 +25,11 @@ protected:
 public:
 	afx_msg void OnPaint();
 	virtual BOOL OnInitDialog();
+	void CalcMyFont(CDC* pDC, CFont& resfont);
 	void DrawCard(CDC* pDC, int type, int sx, int sy, int pos);
 	void Draw(CPaintDC* pDC);
 	void DrawRarity(CDC* pdc, int type, int sx, int sy);
+	void SetPos(int x, int y, int& resx, int& resy);
 	int SpawnCard();
 	afx_msg void OnBnClickedButton1();
 	CGameDlg* prt;
@@ -41,4 +43,5 @@ public:
 	CButton CChoice3;
 	CButton CSkip;
 	CButton CReroll;
+	CFont curfont;
 };

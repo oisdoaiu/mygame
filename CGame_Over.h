@@ -29,4 +29,9 @@ public:
 	CButton CConfirm;
 	CGameDlg* prt;
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	void CalcMyFont(CDC* pDC, CFont& resfont);
+	void SetPos(int x, int y, int& resx, int& resy);
+	CFont curfont;
+	afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
+	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 };

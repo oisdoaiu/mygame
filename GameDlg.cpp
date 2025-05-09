@@ -8,6 +8,7 @@
 #include "GameDlg.h"
 #include "CAbility.h"
 #include "afxdialogex.h"
+#include<cassert>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,13 +91,72 @@ END_MESSAGE_MAP()
 // CGameDlg 消息处理程序
 
 int POSX[5], POSY[5], Game_Round;
-const int SPACE_X = 200, SPACE_Y = 200;
+int SPACE_X = 200, SPACE_Y = 200;
 const int SCORE[CARD_NUM+1] = { 0,1,2,1,3,2,1,1,1,1,1,2,3,0,1,1,3,2,3,3,1,1,1,2,5,1,3,1,1,1,2,3,0,0,2 };
 
+void CGameDlg::SetPos(int x, int y, int& resx, int& resy) {
+	// 获取屏幕分辨率
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	// 计算窗口的大小和位置
+	resx = static_cast<int>(screenWidth * (x / 2560.0));
+	resy = static_cast<int>(screenHeight * (y / 1600.0));
+}
+
+void CGameDlg::SetPos(int x, int y, int lx, int ly, int &resx1, int &resy1, int &resx2, int &resy2) {
+	// 获取屏幕分辨率
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	// 计算相对比例
+	double relativeWidthRatio = lx / 2560.0; // 预设宽度与预设分辨率的比例
+	double relativeHeightRatio = ly / 1600.0; // 预设高度与预设分辨率的比例
+
+	// 计算窗口的大小和位置
+	resx2 = static_cast<int>(screenWidth * relativeWidthRatio);
+	resy2 = static_cast<int>(screenHeight * relativeHeightRatio);
+	resx1 = static_cast<int>(screenWidth * (x / 2560.0));
+	resy1 = static_cast<int>(screenHeight * (y / 1600.0));
+}
+
+CFont curfont;
 BOOL CGameDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	MoveWindow(100, 100, 1500, 1200);
+	CDC* pDC = GetDC();
+	// 获取当前屏幕的垂直 DPI
+	int currentDPI = pDC->GetDeviceCaps(LOGPIXELSY);
+
+	// 预设 DPI（对应 2560*1600 分辨率和 150% 缩放的情况）
+	int defaultDPI = 96 * 1.5;
+
+	// 预设字体的高度和宽度（逻辑单位）
+	int defaultFontHeight = 18;
+	int defaultFontWidth = 9;
+
+	// 计算当前字体的高度和宽度
+	int currentFontHeight = static_cast<int>(defaultFontHeight * static_cast<double>(currentDPI) / defaultDPI);
+	int currentFontWidth = static_cast<int>(defaultFontWidth * static_cast<double>(currentDPI) / defaultDPI);
+
+	// 创建字体
+	LOGFONT lf;
+	ZeroMemory(&lf, sizeof(LOGFONT));
+	lf.lfHeight = -currentFontHeight; // 负数表示以逻辑单位指定字体高度
+	lf.lfWidth = currentFontWidth;    // 直接设置字体宽度
+	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("SimHei")); // 设置字体名称
+	//lf.lfWeight = FW_BOLD; // 设置字体为粗体
+
+	//CString tmp;
+	//tmp.Format(TEXT("%d %d"), lf.lfHeight, lf.lfWidth);
+	//MessageBox(tmp);
+
+	curfont.CreateFontIndirect(&lf);
+	int px, py, plx, ply;
+	SetPos(100, 100, 1500, 1300, px, py, plx, ply);
+	MoveWindow(px, py, plx, ply);
+
+	
 	// 将“关于...”菜单项添加到系统菜单中。
 
 	// IDM_ABOUTBOX 必须在系统命令范围内。
@@ -122,30 +182,39 @@ BOOL CGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	CCheck.MoveWindow(250, 500, 140, 40);
-	CCheckA.MoveWindow(250, 550, 140, 40);
-	CCALC.MoveWindow(880, 1050, 140, 40);
+	SetPos(250, 500, 140, 40, px, py, plx, ply);
+	CCheck.MoveWindow(px, py, plx, ply);
+	SetPos(250, 550, 140, 40, px, py, plx, ply);
+	CCheckA.MoveWindow(px, py, plx, ply);
+	SetPos(880, 1150, 140, 40, px, py, plx, ply);
+	CCALC.MoveWindow(px, py, plx, ply);
 	int START_X = 500, START_Y = 100;
+	SetPos(500, 100, START_X, START_Y);
+	SetPos(200, 220, SPACE_X, SPACE_Y);
 	Cost = 20; 
-	Cost = 2000000;
-	Game_Round = 3; 
+	Game_Round = 0; 
 	memset(Sum, 0, sizeof Sum);
 	Total_Money = 0;
 	Max_Money = 0;
 	Money = 0; 
 	cards.clear(); 
 	reroll_num = 3;
-	delete_num = 3;
+	delete_num = 1;
 	POSX[0] = START_X; for (int i = 1; i < 5; i++) POSX[i] = POSX[i - 1] + SPACE_X;
 	POSY[0] = START_Y; for (int i = 1; i < 5; i++) POSY[i] = POSY[i - 1] + SPACE_Y;
 	Card new_card;
 	new_card.Create(0);
 	cards.push_back(new_card);
-	new_card.Create(4);
-	for (int i = 1; i <= 3; i++) cards.push_back(new_card);
-	new_card.Create(3);
-	for (int i = 1; i <= 3; i++) cards.push_back(new_card);
-	//cards.push_back(new_card);
+	
+	new_card.Create(6);
+	cards.push_back(new_card);
+	new_card.Create(9);
+	cards.push_back(new_card);
+	new_card.Create(32);
+	cards.push_back(new_card);
+	new_card.Create(14);
+	cards.push_back(new_card);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -172,45 +241,51 @@ void CGameDlg::OnPaint()
 {
 	CPaintDC dc(this); // 设备上下文
 	CRect rect;
-	GetClientRect(&rect); // 获取客户区大小
-
-	// 创建内存设备上下文
-	CDC memDC;
-	memDC.CreateCompatibleDC(&dc); // 创建与屏幕兼容的内存DC
-
-	// 创建位图并选入内存DC
-	CBitmap bitmap;
-	bitmap.CreateCompatibleBitmap(&dc, rect.Width(), rect.Height());
-	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
-
-	// 在内存DC中绘制内容
-	memDC.FillSolidRect(&rect, RGB(255, 255, 255)); // 填充背景色
-	memDC.SetTextColor(RGB(0, 0, 0)); // 设置文字颜色
-	memDC.SetBkMode(TRANSPARENT); // 设置背景模式为透明
+	GetClientRect(rect);
+	dc.FillSolidRect(rect, RGB(255, 255, 255));
 	
 	CString tmp;
+	int px, py;
 	//显示钱数
+	CDC* pDC = GetDC();
+	//SetMyFont(pDC);
+	pDC->SelectObject(&curfont);
 	tmp.Format(TEXT("金钱：%lld"), Money);
-	memDC.TextOut(250, 300, tmp);
-	memDC.SetTextColor(RGB(255, 0, 0));
+	SetPos(250, 300, px, py);
+	pDC->TextOutW(px, py, tmp);
+	pDC->SetTextColor(RGB(255, 0, 0));
+	//SetMyFont(pDC);
 	tmp.Format(TEXT("需求：%lld"), Cost);
-	memDC.TextOut(250, 320, tmp);
-	memDC.SetTextColor(RGB(0, 0, 0));
+	SetPos(250, 340, px, py);
+	pDC->TextOutW(px, py, tmp);
+	pDC->SetTextColor(RGB(0, 0, 0));
 
-	//显示回合
-	CFont newFont;
+	// 获取当前屏幕的 DPI
+	int currentDPI = pDC->GetDeviceCaps(LOGPIXELSY);
+
+	// 预设 DPI（对应你的 2560*1600 分辨率和 150% 缩放的情况）
+	int defaultDPI = 96 * 1.5; // 标准 DPI 是 96，150% 缩放就是 96 * 1.5
+
+	// 预设字体高度（点）
+	int defaultFontHeightPoints = 24;
+
+	// 计算当前字体高度
+	int currentFontHeight = -MulDiv(defaultFontHeightPoints, currentDPI, 72);
+
+	// 创建字体
 	LOGFONT lf;
-	memset(&lf, 0, sizeof(LOGFONT));
-	lf.lfHeight = -MulDiv(24, memDC.GetDeviceCaps(LOGPIXELSY), 72); // 设置字体高度为24点
-	lf.lfWeight = FW_NORMAL; // 字体粗细
-	lf.lfOutPrecision = OUT_TT_ONLY_PRECIS; // 仅使用TrueType字体
-	wcscpy_s(lf.lfFaceName, _T("Arial")); // 字体名称
-	newFont.CreateFontIndirect(&lf);
-	// 保存原来的字体
-	CFont* pOldFont = memDC.SelectObject(&newFont);
-	// 使用TextOut绘制文字
+	ZeroMemory(&lf, sizeof(LOGFONT));
+	lf.lfHeight = currentFontHeight;
+	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("Arial")); // 设置字体名称
+
+	CFont font;
+	font.CreateFontIndirect(&lf);
+	CFont* pOldFont = pDC->SelectObject(&font);
+
 	tmp.Format(TEXT("第%d年"), Game_Round / 4 + 1);
-	memDC.TextOut(230, 80, tmp);
+
+	SetPos(240, 80, px, py);
+	pDC->TextOut(px, py, tmp);
 	switch (Game_Round%4) {
 	case 0:
 		tmp.Format(TEXT("春"));
@@ -225,27 +300,20 @@ void CGameDlg::OnPaint()
 		tmp.Format(TEXT("冬"));
 		break;
 	}
-	memDC.TextOutW(270, 150, tmp);
+	SetPos(270, 150, px, py);
+	pDC->TextOutW(px, py, tmp);
 	// 恢复原来的字体
-	memDC.SelectObject(pOldFont);
+	pDC->SelectObject(pOldFont);
 
 	//绘制游戏区域
 	SpawnTable();
-	DrawBlocks(&memDC);
+	DrawBlocks(pDC);
 
 	//启动一轮计算
 	CCALC.EnableWindow(FALSE);
-	//CCheck.EnableWindow(FALSE);
+	CCheck.EnableWindow(FALSE);
 	CCheckA.EnableWindow(FALSE);
 	SetTimer(3, 100, NULL);
-		
-	// 将内存DC的内容复制到屏幕
-	dc.BitBlt(0, 0, rect.Width(), rect.Height(), &memDC, 0, 0, SRCCOPY);
-
-	// 清理资源
-	memDC.SelectObject(pOldBitmap);
-	bitmap.DeleteObject();
-	memDC.DeleteDC();
 }
 
 const int TIMEG = 300;
@@ -297,6 +365,9 @@ void CGameDlg::SpawnTable()
 		cards[card_table[i][j]].mul = 1;
 		cards[card_table[i][j]].initscore = true;
 		if (GetType(i, j) == 14 || GetType(i, j) == 15) posCard(i, j).cnt = 0;
+		if (GetType(i, j) == 13) {
+			posCard(i, j).mul = posCard(i, j).cnt+1;
+		}
 		//特殊处理茶和茶杯标记
 	}
 }
@@ -305,7 +376,10 @@ void CGameDlg::AddScore(int x, int y, ll add, CDC* pDC)
 {
 	//擦除之前的
 	int sx = POSX[x], sy = POSY[y];
-	CRect rect(sx, sy - 70, sx + 100, sy - 20);
+	int dx1, dy1, dx2, dy2;
+	SetPos(0, -70, dx1, dy1);
+	SetPos(100, -20, dx2, dy2);
+	CRect rect(sx, sy + dy1, sx + dx2, sy + dy2);
 	CBrush whiteBrush(RGB(255, 255, 255));
 	CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 	pDC->FillRect(rect, &whiteBrush);
@@ -321,11 +395,13 @@ void CGameDlg::AddScore(int x, int y, ll add, CDC* pDC)
 	CString tmp;
 	if (add > 0) {
 		tmp.Format(TEXT("+ %lld"), add);
-		pDC->TextOutW(sx + 5, sy - 60, tmp);
+		SetPos(8, -70, dx1, dy1);
+		pDC->TextOutW(sx + dx1, sy + dy1, tmp);
 	}
 	else if (add < 0) {
 		tmp.Format(TEXT("- %lld"), -add);
-		pDC->TextOutW(sx + 5, sy - 60, tmp);
+		SetPos(8, -70, dx1, dy1);
+		pDC->TextOutW(sx + dx1, sy + dy1, tmp);
 	}
 }
 
@@ -333,7 +409,10 @@ void CGameDlg::MulScore(int x, int y, ll mul, CDC* pDC)
 {
 	//擦除之前的
 	int sx = POSX[x], sy = POSY[y];
-	CRect rect(sx, sy - 70, sx + 100, sy - 20);
+	int dx1, dy1, dx2, dy2;
+	SetPos(0, -70, dx1, dy1);
+	SetPos(100, -20, dx2, dy2);
+	CRect rect(sx, sy + dy1, sx + dx2, sy + dy2);
 	CBrush whiteBrush(RGB(255, 255, 255));
 	CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 	pDC->FillRect(rect, &whiteBrush);
@@ -348,14 +427,17 @@ void CGameDlg::MulScore(int x, int y, ll mul, CDC* pDC)
 	//绘制加数
 	CString tmp;
 	tmp.Format(TEXT("X %lld"), mul);
-	pDC->TextOutW(sx + 5, sy - 60, tmp);
+	SetPos(5, -60, dx1, dy1);
+	pDC->TextOutW(sx + dx1, sy + dy1, tmp);
 }
 
 void CGameDlg::InitScore(int x, int y, ll score, CDC* pDC)
 {
 	CString tmp;
 	tmp.Format(TEXT("%lld"), score);
-	pDC->TextOutW(POSX[x] + 5, POSY[y] - 40, tmp);
+	int dx1, dy1;
+	SetPos(5, -40, dx1, dy1);
+	pDC->TextOutW(POSX[x] + dx1, POSY[y] + dy1, tmp);
 	cards[card_table[x][y]].initscore = false;
 	cards[card_table[x][y]].score = score;
 }
@@ -363,7 +445,10 @@ void CGameDlg::InitScore(int x, int y, ll score, CDC* pDC)
 void CGameDlg::ClearScore(int x, int y, CDC* pDC)
 {
 	int sx = POSX[x], sy = POSY[y];
-	CRect rect(sx, sy - 70, sx + 100, sy - 20);
+	int dx1, dx2, dy1, dy2;
+	SetPos(0, -70, dx1, dy1);
+	SetPos(100, -20, dx2, dy2);
+	CRect rect(sx, sy + dy1, sx + dx2, sy + dy2);
 	CBrush whiteBrush(RGB(255, 255, 255));
 	CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 	pDC->FillRect(rect, &whiteBrush);
@@ -385,7 +470,11 @@ ll CGameDlg::GetScore(int x, int y, CDC* pDC)
 void CGameDlg::AddMul(int x, int y, ll mul, char opt, CDC* pDC)
 {
 	int sx = POSX[x], sy = POSY[y];
-	CRect rect(sx + 5, sy + 65, sx + 90, sy + 90);
+	int dx1, dx2, dy1, dy2;
+	SetPos(5, 85, dx1, dy1);
+	SetPos(90, 100, dx2, dy2);
+	CRect rect(sx + dx1, sy + dy1, sx + dx2, sy + dy2);
+	//CRect rect(sx + 5, sy + 65, sx + 90, sy + 90);
 	CBrush whiteBrush(RGB(255, 255, 255));
 	CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 	pDC->FillRect(rect, &whiteBrush);
@@ -396,8 +485,10 @@ void CGameDlg::AddMul(int x, int y, ll mul, char opt, CDC* pDC)
 		cards[card_table[x][y]].mul *= mul;
 	if (opt == 0)
 		cards[card_table[x][y]].mul += mul;
+	/*
 	CString tmp; tmp.Format(TEXT("X %lld"), cards[card_table[x][y]].mul);
-	pDC->TextOutW(sx + 10, sy + 70, tmp);
+	SetPos(10, 70, dx1, dy1);
+	pDC->TextOutW(sx + dx1, sy + dy1, tmp);*/
 }
 
 void CGameDlg::Eat(int sx, int sy, int tx, int ty, CDC* pDC)
@@ -660,12 +751,12 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 
 	CDC* pDC = GetDC();
+	pDC->SelectObject(curfont);
 
 #define In (tx >= 0 && tx < 5 && ty >= 0 && ty < 5)
 
 	if (nIDEvent == 3) { //开始计算
 		KillTimer(3);
-		
 		SetTimer(1, 1000, NULL);
 	}
 
@@ -857,6 +948,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 						cards[cur].cnt += dlt;
 						AddMul(i, j, dlt, 0, pDC);
 					}
+					cards[cur].DisMark(pDC);
 				}
 
 				//茶杯
@@ -1192,7 +1284,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 				if (cards[cur].type == 32) {
 					if (cards[cur].vis) continue;
 					if (cards[cur].cnt == 3) continue;
-					vector<CPoint> tmp = GetTypeCards(i, j, { 9,10,11,12,13 });
+					vector<CPoint> tmp = GetTypeCards(i, j, { 9,10,11,12,13,18,33,34 });
 					if (tmp.empty()) continue;
 					Updated = true;
 					cards[cur].vis = true;
@@ -1208,6 +1300,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 					for (CPoint v : tmp) {
 						posCard(v).DisMark(pDC);
 					}
+					if (cards[cur].cnt == 3) DelCard(i, j, pDC);
 				}
 
 				//小偷
@@ -1368,6 +1461,48 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 			return;
 		}
 
+		//3老板合成1首富
+		if (GetTypeCards(-1, -1, 12).size() >= 3) {
+
+			vector<CPoint>tmp = GetTypeCards(-1, -1, 12);
+			//标出3个经理
+			int base = 0, mul = 0;
+			for (int i = 0; i < 3; i++) {
+				int mx = tmp[i].x, my = tmp[i].y;
+				cards[card_table[mx][my]].MarkGreen(pDC);
+				base += GetScore(mx, my, pDC);
+				mul += posCard(mx, my).mul - 1;
+			}
+			Wait(TIMEG2);
+
+			//删掉老板，合成首富
+			for (int i = 0; i < 3; i++) {
+				int tx = tmp[i].x, ty = tmp[i].y;
+				cards[card_table[tx][ty]].dead = true;
+				card_table[tx][ty] = 0;
+				ClearScore(tx, ty, pDC);
+				cards[0].pos = CPoint(POSX[tx], POSY[ty]);
+				cards[0].DisMark(pDC);
+			}
+			Wait(200);
+
+			Card ncard;
+			ncard.Create(13);
+			CPoint npos = GetRandomBlock(-1, -1);
+			ncard.pos = CPoint(POSX[npos.x], POSY[npos.y]);
+			cards.push_back(ncard);
+			card_table[npos.x][npos.y] = cards.size() - 1;
+			InitScore(npos.x, npos.y, base, pDC);
+			ncard.MarkYellow(pDC);
+			Wait(TIMEG);
+
+			ncard.DisMark(pDC);
+			AddMul(npos.x, npos.y, mul, 0, pDC);
+
+			SetTimer(1, 500, NULL);
+			return;
+		}
+
 		SetTimer(4, 500, NULL);
 	}
 
@@ -1382,33 +1517,39 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 4) { // 处理卡牌奖金，处理死亡卡牌
 		KillTimer(4);
 
-		int mx = 0;
+		int mx = -1;
 		CPoint mxpos;
 		for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) if (card_table[i][j]) {
 			GetScore(i, j, pDC);
 		}
-		Wait(1000);
+		Wait(800);
 
+		CPoint xpos(-1, -1);
 		for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++)
 			if (card_table[i][j]) {
-				if (GetType(i, j) == 13) continue;
+				if (GetType(i, j) == 13) {
+					xpos = CPoint(i, j);
+					continue;
+				}
 				MulScore(i, j, cards[card_table[i][j]].mul, pDC);
 				int sc = GetScore(i, j, pDC);
 				if (sc > mx)
 					mx = sc,
 					mxpos = CPoint(i, j);
 			}
-		Wait(1000);
+		Wait(800);
 
-		for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) if (GetType(i, j) == 13) {
-			cards[card_table[i][j]].MarkYellow(pDC);
-			cards[card_table[mxpos.x][mxpos.y]].MarkGreen(pDC);
-			Wait(TIMEG);
-			AddScore(i, j, mx, pDC);
-			Wait(1000);
-			cards[card_table[i][j]].DisMark(pDC);
-			cards[card_table[mxpos.x][mxpos.y]].DisMark(pDC);
-			MulScore(i, j, cards[card_table[i][j]].mul, pDC);
+		if (xpos.x != -1) {
+			if (mx >= 0) {
+				posCard(xpos).MarkYellow(pDC);
+				posCard(mxpos).MarkGreen(pDC);
+				Wait(TIMEG);
+				AddScore(xpos.x, xpos.y, mx, pDC);
+				Wait(500);
+				posCard(xpos).DisMark(pDC);
+				posCard(mxpos).DisMark(pDC);
+			}
+			MulScore(xpos.x, xpos.y, cards[card_table[xpos.x][xpos.y]].mul, pDC);
 		}
 
 		ll addscore = 0;
@@ -1423,10 +1564,14 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 		CString tmp;
 		tmp.Format(TEXT("+%lld"), addscore);
 		pDC->SetTextColor(RGB(6, 197, 38));
-		pDC->TextOutW(297, 280, tmp);
+		int dx1, dy1, dx2, dy2;
+		SetPos(297, 280, dx1, dy1);
+		pDC->TextOutW(dx1, dy1, tmp);
 		pDC->SetTextColor(RGB(0, 0, 0));
 
-		CRect rect(250, 300, 400, 320);
+		SetPos(250, 300, dx1, dy1);
+		SetPos(400, 320, dx2, dy2);
+		CRect rect(dx1, dy1, dx2, dy2);
 		CBrush whiteBrush(RGB(255, 255, 255));
 		CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 		pDC->FillRect(rect, &whiteBrush);
@@ -1434,7 +1579,8 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 		whiteBrush.DeleteObject();
 		Money += addscore;
 		tmp.Format(TEXT("金钱：%lld"), Money);
-		pDC->TextOut(250, 300, tmp);
+		SetPos(250, 300, dx1, dy1);
+		pDC->TextOut(dx1, dy1, tmp);
 
 		//处理结算后死亡
 		for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
@@ -1451,7 +1597,7 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 		//后Update，防止统计出错
 		CCheck.EnableWindow(TRUE);
 		CCALC.EnableWindow(TRUE);
-		CCheckA.EnableWindow(TRUE);
+		//CCheckA.EnableWindow(TRUE);
 	}
 
 #undef In
@@ -1464,14 +1610,19 @@ void CGameDlg::OnBnClickedButton1()
 	CCALC.EnableWindow(FALSE);
 	CCheckA.EnableWindow(FALSE);
 	if (Game_Round % 4 == 3) {
+		int dx1, dy1, dx2, dy2;
 		CString tmp;
 		CDC* pDC = GetDC();
+		pDC->SelectObject(curfont);
 		tmp.Format(TEXT("-%lld"), Cost);
-		pDC->SetTextColor(RGB(255,0,0));
-		pDC->TextOutW(301, 280, tmp);
+		pDC->SetTextColor(RGB(255, 0, 0));
+		SetPos(297, 280, dx1, dy1);
+		pDC->TextOutW(dx1, dy1, tmp);
 		pDC->SetTextColor(RGB(0, 0, 0));
 
-		CRect rect(250, 300, 400, 320);
+		SetPos(250, 300, dx1, dy1);
+		SetPos(400, 320, dx2, dy2);
+		CRect rect(dx1, dy1, dx2, dy2);
 		CBrush whiteBrush(RGB(255, 255, 255));
 		CBrush* pOldBrush = pDC->SelectObject(&whiteBrush);
 		pDC->FillRect(rect, &whiteBrush);
@@ -1479,9 +1630,10 @@ void CGameDlg::OnBnClickedButton1()
 		whiteBrush.DeleteObject();
 		Money -= Cost;
 		if (Cost <= 100) Cost += 40;
-		else Cost *= 1.5;
+		else Cost *= 1.4;
 		tmp.Format(TEXT("金钱：%lld"), Money);
-		pDC->TextOut(250, 300, tmp);
+		SetPos(250, 300, dx1, dy1);
+		pDC->TextOutW(dx1, dy1, tmp);
 
 		Wait(1000);
 		if (Money < 0) {
@@ -1491,8 +1643,8 @@ void CGameDlg::OnBnClickedButton1()
 			game_over.DoModal();
 			return;
 		}
-		delete_num += 2;
 		reroll_num += 2;
+		delete_num++;
 	}
 	UpdateCard();
 	Game_Round++;
@@ -1542,9 +1694,9 @@ void CGameDlg::Restart()
 void CGameDlg::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	CString tmp;
+	/*CString tmp;
 	tmp.Format(TEXT("%d %d"), point.x, point.y);
-	MessageBox(tmp);
+	MessageBox(tmp);*/
 	CDialogEx::OnRButtonDown(nFlags, point);
 }
 

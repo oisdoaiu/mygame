@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "afxdialogex.h"
 #include "Card.h"
+#include "GameDlg.h"
 
 
 // Card 对话框
@@ -27,34 +28,80 @@ void Card::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2, Check_Lib);
 }
 
-const int DIS = 5; //边框
-const int DIS1 = 5; //数字
-const int CARDWIDTH = 100;
-const int CARDLENGTH = 100;
+void CalcPos(int x, int y, int& resx, int& resy) {
+	// 获取屏幕分辨率
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	// 计算窗口的大小和位置
+	resx = static_cast<int>(screenWidth * (x / 2560.0));
+	resy = static_cast<int>(screenHeight * (y / 1600.0));
+}
+
+void CalcMyFont(CDC* pDC, CFont &resfont) {
+	// 获取当前屏幕的垂直 DPI
+	int currentDPI = pDC->GetDeviceCaps(LOGPIXELSY);
+
+	// 预设 DPI（对应 2560*1600 分辨率和 150% 缩放的情况）
+	int defaultDPI = 96 * 1.5;
+
+	// 预设字体的高度和宽度（逻辑单位）
+	int defaultFontHeight = 18;
+	int defaultFontWidth = 9;
+
+	// 计算当前字体的高度和宽度
+	int currentFontHeight = static_cast<int>(defaultFontHeight * static_cast<double>(currentDPI) / defaultDPI);
+	int currentFontWidth = static_cast<int>(defaultFontWidth * static_cast<double>(currentDPI) / defaultDPI);
+
+	// 创建字体
+	LOGFONT lf;
+	ZeroMemory(&lf, sizeof(LOGFONT));
+	lf.lfHeight = -currentFontHeight; // 负数表示以逻辑单位指定字体高度
+	lf.lfWidth = currentFontWidth;    // 直接设置字体宽度
+	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("SimHei")); // 设置字体名称
+
+	resfont.CreateFontIndirect(&lf);
+}
+
+int DIS = 5; //边框
+int CARDWIDTH;
+int CARDLENGTH;
 void Card::Draw(CDC* pDC)
 {
+	int DISX, DISY;
+	CalcPos(5, 5, DISX, DISY);
+	CFont curfont;
+	CalcMyFont(pDC, curfont);
+	pDC->SelectObject(&curfont);
+	CalcPos(120, 120, CARDWIDTH, CARDLENGTH);
 	CRect tmp_rect(pos.x, pos.y, pos.x + CARDLENGTH, pos.y + CARDWIDTH);
 	pDC->Rectangle(tmp_rect);
 	CString tmp;
-	const int dx1 = 40;	
-	const int dy1 = 40;
-	const int dx2 = 30;
-	const int dy2 = 40;
-	const int dx3 = 20;
-	const int dy3 = 40;
-	const int dx4 = 13;
-	const int dy4 = 40;
+	int dx1 = 50;	
+	int dy1 = 50;
+	int dx2 = 40;
+	int dy2 = 50;
+	int dx3 = 30;
+	int dy3 = 50;
+	int dx4 = 23;
+	int dy4 = 50;
+	CalcPos(46, 54, dx1, dy1);
+	CalcPos(37, 54, dx2, dy2);
+	CalcPos(28, 54, dx3, dy3);
+	CalcPos(19, 54, dx4, dy4);
 
 	if (mul > 1) {
-		tmp.Format(TEXT("X %d"), mul);
-		pDC->TextOutW(pos.x + 10, pos.y + 70, tmp);
+		tmp.Format(TEXT("X %lld"), mul);
+		int ddx1, ddy1;
+		CalcPos(10, 95, ddx1, ddy1);
+		pDC->TextOutW(pos.x + ddx1, pos.y + ddy1, tmp);
 	}
 
 	if (type == 1) {
 		tmp.Format(TEXT("兔子"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 		tmp.Format(TEXT("%d"), 1-cnt);
-		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+		pDC->TextOutW(pos.x + DISX, pos.y + DISY, tmp);
 	}
 	if (type == 2) {
 		tmp.Format(TEXT("兔子窝"));
@@ -112,13 +159,13 @@ void Card::Draw(CDC* pDC)
 		tmp.Format(TEXT("茶"));
 		pDC->TextOutW(pos.x + dx1, pos.y + dy1, tmp);
 		tmp.Format(TEXT("%d"), 1 - cnt);
-		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+		pDC->TextOutW(pos.x + DISX, pos.y + DISY, tmp);
 	}
 	if (type == 16) {
 		tmp.Format(TEXT("茶壶"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 		tmp.Format(TEXT("%d"), 1 - cnt);
-		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+		pDC->TextOutW(pos.x + DISX, pos.y + DISY, tmp);
 	}
 	if (type == 17) {
 		tmp.Format(TEXT("奶牛"));
@@ -184,7 +231,7 @@ void Card::Draw(CDC* pDC)
 		tmp.Format(TEXT("咖啡"));
 		pDC->TextOutW(pos.x + dx2, pos.y + dy2, tmp);
 		tmp.Format(TEXT("%d"), cnt);
-		pDC->TextOutW(pos.x + DIS1, pos.y + DIS1, tmp);
+		pDC->TextOutW(pos.x + DISX, pos.y + DISY, tmp);
 	}
 	if (type == 33) {
 		tmp.Format(TEXT("小偷"));
@@ -198,11 +245,13 @@ void Card::Draw(CDC* pDC)
 
 void Card::Mark(CDC* pDC, int R, int G, int B)
 {
-	CRect tmp_rect(pos.x-DIS, pos.y- DIS, pos.x + CARDLENGTH+ DIS, pos.y + CARDWIDTH+ DIS);
+	int DISX, DISY;
+	CalcPos(5, 5, DISX, DISY);
+	CRect tmp_rect(pos.x-DISX, pos.y- DISY, pos.x + CARDLENGTH+ DISX, pos.y + CARDWIDTH+ DISY);
 	CBrush Brush(RGB(R, G, B));
-	CBrush* pOldBrush = pDC->SelectObject(&Brush);
-	pDC->Rectangle(tmp_rect);
-	pDC->SelectObject(pOldBrush);
+	//CBrush* pOldBrush = pDC->SelectObject(&Brush);
+	pDC->FillRect(tmp_rect,&Brush);
+	//pDC->SelectObject(pOldBrush);
 	Brush.DeleteObject();
 	Draw(pDC);
 }
@@ -238,7 +287,9 @@ void Card::MarkPink(CDC* pDC)
 
 void Card::DisMark(CDC* pDC)
 {
-	CRect tmp_rect(pos.x - DIS, pos.y - DIS, pos.x + CARDLENGTH + DIS, pos.y + CARDWIDTH + DIS);
+	int DISX, DISY;
+	CalcPos(5, 5, DISX, DISY);
+	CRect tmp_rect(pos.x - DISX, pos.y - DISY, pos.x + CARDLENGTH + DISX, pos.y + CARDWIDTH + DISY);
 	CBrush Brush(RGB(255, 255, 255));
 	CBrush* pOldBrush = pDC->SelectObject(&Brush);
 	pDC->FillRect(tmp_rect,&Brush);

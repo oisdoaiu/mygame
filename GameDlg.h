@@ -42,6 +42,9 @@ public:
 	int card_table[5][5];
 	vector<Card> cards;
 	vector<Abi> abilities;
+	void SetPos(int x, int y, int& resx, int& resy);
+	void SetPos(int x, int y, int lx, int ly, int& resx1, int& resy1, int& resx2, int& resy2);
+	void SetMyFont(CDC* pDC);
 	void DrawBlocks(CDC* pDC);
 	void SpawnTable();
 	void AddScore(int x, int y, ll add, CDC* pDC);

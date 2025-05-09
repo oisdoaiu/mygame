@@ -31,4 +31,11 @@ public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnBnClickedDelete();
 	virtual BOOL OnInitDialog();
+	void CalcMyFont(CDC* pDC, CFont& resfont);
+	void SetPos(int x, int y, int& resx, int& resy);
+	CFont curfont;
+	CButton CDelete;
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	CButton CConfirm;
 };
